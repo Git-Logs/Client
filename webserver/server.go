@@ -38,7 +38,6 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var secret string
-	var channelId string
 	var repoName string
 
 	id := r.URL.Query().Get("id")
@@ -96,8 +95,10 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get channel ID from database
-	err = pool.QueryRow(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&channelId, &repoName)
+	var header = r.Header.Get("X-GitHub-Event")
+
+	// Get repo_name from database
+	err = pool.QueryRow(ctx, "SELECT repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&repoName)
 
 	if err != nil {
 		fmt.Println(err)
@@ -105,8 +106,6 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("This request has an invalid repo_url parameter"))
 		return
 	}
-
-	var header = r.Header.Get("X-GitHub-Event")
 
 	var messageSend discordgo.MessageSend
 
@@ -425,16 +424,38 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	_, err = discord.ChannelMessageSendComplex(channelId, &messageSend)
+	// Get channel ID from database
+	rows, err := pool.Query(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id)
 
 	if err != nil {
-		fmt.Println("Error sending message: ", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error sending message: " + err.Error()))
+		fmt.Println(err)
+		w.WriteHeader(404)
+		w.Write([]byte("This request has an invalid repo_url parameter"))
 		return
 	}
 
-	w.Write([]byte("OK: " + repoName))
+	defer rows.Close()
+
+	var errors string
+
+	for rows.Next() {
+		var channelId string
+
+		err = rows.Scan(&channelId)
+
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		_, err = discord.ChannelMessageSendComplex(channelId, &messageSend)
+
+		if err != nil {
+			errors += err.Error()
+		}
+	}
+
+	w.Write([]byte("OK: " + repoName + "\n" + errors))
 }
 
 func main() {
