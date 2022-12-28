@@ -17,7 +17,7 @@ selfhostbuild:
 selfhostrun:
 	DATABASE_URL=$(DATABASE_URL) cargo run --release ${ARGS}
 push:
-	@for bin in $(BINS) ; do \
+	@for bin in $(BIN_NAME) ; do \
 		echo "Pushing $$bin to $(HOST):${PROJ_NAME}/$$bin/$$bin.new"; \
 		scp -C target/x86_64-unknown-linux-gnu/release/$$bin root@$(HOST):${PROJ_NAME}/$$bin/$$bin.new; \
 	done
