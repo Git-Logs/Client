@@ -30,3 +30,7 @@ You should ideally make this 2 systemd services in production.
 
 - Run the bot with ``make run`` (in the ``bot`` folder).
 - Run the webserver with ``./webserver`` (in the ``webserver`` folder).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details (once it is made)
