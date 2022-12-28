@@ -48,23 +48,23 @@ func IssuesFn(bytes []byte) (discordgo.MessageSend, error) {
 					Name:    gh.Sender.Login,
 					IconURL: gh.Sender.AvatarURL,
 				},
+				Description: body,
 				Title: fmt.Sprintf("Issue %s on %s (#%d)", gh.Action, gh.Repo.FullName, gh.Issue.Number),
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "Action",
 						Value: gh.Action,
+						Inline: true,
 					},
 					{
 						Name:  "User",
 						Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						Inline: true,
 					},
 					{
 						Name:  "Title",
 						Value: gh.Issue.Title,
-					},
-					{
-						Name:  "Body",
-						Value: body,
+						Inline: true,
 					},
 				},
 			},
