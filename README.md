@@ -14,6 +14,8 @@ Github v2 is the rewrite of the original Github webhook logger.
 - `check_suite`
 - `status`
 
+## The Stack
+
 - bot -> the frontend bot that allows configuration of the webhook logger
 - webserver -> the webserver that hosts the webhook logger
 
@@ -42,6 +44,8 @@ You should ideally make this 2 systemd services in production.
 
 - Run the bot with ``make run`` (in the ``bot`` folder).
 - Run the webserver with ``./webserver`` (in the ``webserver`` folder).
+
+**Note that a ``206`` status code is returned if ``repo_url`` is not added to the webhook**
 
 ## License
 

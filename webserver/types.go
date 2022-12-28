@@ -79,6 +79,19 @@ type GithubWebhook struct {
 		HTMLURL          string `json:"html_url"`
 		OrganizationsURL string `json:"organizations_url"`
 	} `json:"sender,omitempty"`
+	Commit struct { // status
+		HTMLURL string `json:"html_url"`
+		SHA     string `json:"sha"`
+		Commit  struct {
+			ID      string `json:"id"`
+			Message string `json:"message"`
+			Author  struct {
+				Name     string `json:"name"`
+				Email    string `json:"email"`
+				Username string `json:"username"`
+			} `json:"author,omitempty"`
+		} `json:"commit"`
+	} `json:"commit"`
 	HeadCommit struct { // common
 		ID      string `json:"id"`
 		Message string `json:"message"`

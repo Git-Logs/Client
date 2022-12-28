@@ -102,7 +102,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println(err)
-		w.WriteHeader(404)
+		w.WriteHeader(http.StatusPartialContent)
 		w.Write([]byte("This request has an invalid repo_url parameter"))
 		return
 	}
@@ -464,6 +464,10 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 			gh.Context = "-"
 		}
 
+		if gh.Commit.Commit.Author.Username == "" {
+			gh.Commit.Commit.Author.Username = gh.Commit.Commit.Author.Name
+		}
+
 		messageSend = discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
@@ -477,6 +481,10 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 					Description: gh.Description + moreInfoMsg,
 					Fields: []*discordgo.MessageEmbedField{
 						{
+							Name:  "Commit",
+							Value: fmt.Sprintf("[``%s``](%s) - %s | [%s](%s)", gh.Commit.SHA[:7], gh.Commit.HTMLURL, gh.Commit.Commit.Message, gh.Commit.Commit.Author.Username, strings.ReplaceAll("https://github.com/"+gh.Commit.Commit.Author.Username, " ", "%20")),
+						},
+						{
 							Name:   "User",
 							Value:  fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
 							Inline: true,
@@ -484,11 +492,6 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 						{
 							Name:   "Context",
 							Value:  gh.Context,
-							Inline: true,
-						},
-						{
-							Name:   "Target URL",
-							Value:  gh.TargetURL,
 							Inline: true,
 						},
 					},
