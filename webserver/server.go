@@ -14,6 +14,8 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	jsoniter "github.com/json-iterator/go"
@@ -408,7 +410,11 @@ func main() {
 		panic(err)
 	}
 
-	http.HandleFunc("/kittycat", webhookRoute)
+	r := chi.NewMux()
 
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+	r.Use(middleware.Logger, middleware.Recoverer)
+
+	r.HandleFunc("/kittycat", webhookRoute)
+
+	http.ListenAndServe(":"+os.Getenv("PORT"), r)
 }
