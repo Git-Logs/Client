@@ -4,7 +4,7 @@ RUSTFLAGS_LOCAL="-C target-cpu=native $(RUSTFLAGS) -C link-arg=-fuse-ld=lld"
 CARGO_TARGET_GNU_LINKER="x86_64-unknown-linux-gnu-gcc"
 
 # Some sensible defaults, should be overrided per-project
-BINS ?= bot
+BIN_NAME ?= bot
 PROJ_NAME ?= github-v2
 HOST ?= 100.86.85.125
 
