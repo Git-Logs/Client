@@ -421,6 +421,7 @@ func main() {
 
 	r.Use(middleware.Logger, middleware.Recoverer)
 
+	// Webhook route
 	r.HandleFunc("/kittycat", webhookRoute)
 
 	http.ListenAndServe(":"+os.Getenv("PORT"), r)
