@@ -94,7 +94,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get channel ID from database
-	err = pool.QueryRow(ctx, "SELECT channel_id, repo_name FROM repos WHERE lower(repo_url) = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&channelId, &repoName)
+	err = pool.QueryRow(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_url = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&channelId, &repoName)
 
 	if err != nil {
 		w.WriteHeader(404)
