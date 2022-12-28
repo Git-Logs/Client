@@ -94,9 +94,10 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get channel ID from database
-	err = pool.QueryRow(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_url = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&channelId, &repoName)
+	err = pool.QueryRow(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&channelId, &repoName)
 
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(404)
 		w.Write([]byte("This request has an invalid repo_url parameter"))
 		return
