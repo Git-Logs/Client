@@ -7,6 +7,16 @@ Github v2 is the rewrite of the original Github webhook logger.
 
 ## Self Hosting
 
+### Database
+
+Run the following in ``psql`` to create the database:
+
+```sql
+CREATE DATABASE github;
+\c github
+\i schema.sql
+```
+
 ### Compiling
 
 Fill out ``bot/.env`` and ``webserver/.env`` (see the ``.env.sample`` files there)

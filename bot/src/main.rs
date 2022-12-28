@@ -111,19 +111,8 @@ async fn main() {
 
     env_logger::init();
 
-    // proxy url is always http://localhost:3219
-    let mut proxy_url = "http://127.0.0.1:3219/".to_string();
-    if let Ok(v) = std::env::var("PROXY_URL") {
-        proxy_url = v;
-    }
-
-    info!("Proxy URL: {}", proxy_url);
-
     let http =
-        serenity::HttpBuilder::new(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
-            .proxy(proxy_url)
-            .ratelimiter_disabled(true)
-            .build();
+        serenity::HttpBuilder::new(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN")).build();
 
     let client_builder =
         serenity::ClientBuilder::new_with_http(
