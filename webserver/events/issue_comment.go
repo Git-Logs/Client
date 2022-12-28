@@ -66,14 +66,12 @@ func IssueCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 				Title: fmt.Sprintf("Comment on %s (#%d) %s", gh.Repo.FullName, gh.Issue.Number, gh.Action),
 				Fields: []*discordgo.MessageEmbedField{
 					{
-						Name:   "User",
-						Value:  fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
-						Inline: true,
+						Name:  "User",
+						Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
 					},
 					{
-						Name:   "Title",
-						Value:  gh.Issue.Title,
-						Inline: true,
+						Name:  "Title",
+						Value: gh.Issue.Title,
 					},
 					{
 						Name:  "Parent Issue",
