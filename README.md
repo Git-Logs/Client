@@ -18,4 +18,5 @@ Fill out ``bot/.env`` and ``webserver/.env`` (see the ``.env.sample`` files ther
 
 You should ideally make this 2 systemd services in production.
 
-- Run the bot with ``make run``.
+- Run the bot with ``make run`` (in the ``bot`` folder).
+- Run the webserver with ``./webserver`` (in the ``webserver`` folder).
