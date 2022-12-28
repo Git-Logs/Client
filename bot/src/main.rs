@@ -126,7 +126,10 @@ async fn main() {
             .build();
 
     let client_builder =
-        serenity::ClientBuilder::new_with_http(http, serenity::GatewayIntents::all());
+        serenity::ClientBuilder::new_with_http(
+            http, 
+            serenity::GatewayIntents::MESSAGE_CONTENT | serenity::GatewayIntents::GUILD_MESSAGES | serenity::GatewayIntents::GUILDS
+        );
 
     let framework = poise::Framework::new(
         poise::FrameworkOptions {

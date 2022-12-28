@@ -165,7 +165,7 @@ pub async fn newhook(
         .content(
             format!(
                 "
-Next, add the following webhook to your Github repositories (or organizations): `{respond_url}/clancat?id={id}`
+Next, add the following webhook to your Github repositories (or organizations): `{respond_url}/kittycat?id={id}`
 
 Set the `Secret` field to `{webh_secret}`.
 

@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -22,11 +24,35 @@ var (
 	json    = jsoniter.ConfigCompatibleWithStandardLibrary
 	discord *discordgo.Session
 	pool    *pgxpool.Pool
+	ctx     = context.Background()
 )
 
 func webhookRoute(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		w.WriteHeader(200)
+		w.Write([]byte("This is the webhook route. You need to put this in Github as per the instructions in your DM"))
+		return
+	}
+
 	var secret string
 	var channelId string
+	var repoName string
+
+	id := r.URL.Query().Get("id")
+
+	if id == "" {
+		w.WriteHeader(400)
+		w.Write([]byte("This request is missing the id parameter"))
+		return
+	}
+
+	err := pool.QueryRow(ctx, "SELECT secret FROM webhooks WHERE id = $1", id).Scan(&secret)
+
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("This request has an invalid id parameter"))
+		return
+	}
 
 	var bodyBytes []byte
 
@@ -50,14 +76,29 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Header.Get("X-GitHub-Event") == "ping" {
+		w.WriteHeader(200)
+		w.Write([]byte("pong"))
+		return
+	}
+
 	var gh GithubWebhook
 
-	err := json.Unmarshal(bodyBytes, &gh)
+	err = json.Unmarshal(bodyBytes, &gh)
 
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(400)
 		w.Write([]byte("This request is not a valid JSON:" + err.Error()))
+		return
+	}
+
+	// Get channel ID from database
+	err = pool.QueryRow(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_url = $1 AND webhook_id = $2", gh.Repo.FullName, id).Scan(&channelId, &repoName)
+
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("This request has an invalid repo_url parameter"))
 		return
 	}
 
@@ -339,9 +380,34 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("OK"))
+	w.Write([]byte("OK: " + repoName))
 }
 
 func main() {
 	godotenv.Load()
+
+	var err error
+	pool, err = pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	discord, err = discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
+
+	discord.Identify.Intents = discordgo.IntentsGuilds
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = discord.Open()
+
+	if err != nil {
+		panic(err)
+	}
+
+	http.HandleFunc("/kittycat", webhookRoute)
+
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
