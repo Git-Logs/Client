@@ -2,6 +2,8 @@
 
 Rewrite of the original Github webhook logger (Git Logs).
 
+---
+
 ## Supported Events
 
 - `push`
@@ -14,12 +16,16 @@ Rewrite of the original Github webhook logger (Git Logs).
 - `check_suite`
 - `status`
 
-More events will be added in the future.
+**More coming soon**
+
+---
 
 ## The Stack
 
 - bot -> the frontend bot that allows configuration of the webhook logger
 - webserver -> the webserver that hosts the webhook logger
+
+---
 
 ## Self Hosting
 
@@ -48,6 +54,8 @@ You should ideally make this 2 systemd services in production.
 - Run the webserver with ``./webserver`` (in the ``webserver`` folder).
 
 **Note that a ``206`` status code is returned if ``repo_url`` is not added to the webhook**
+
+---
 
 ## License
 
