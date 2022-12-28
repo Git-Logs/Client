@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-chi/chi/v5"
@@ -419,7 +420,7 @@ func main() {
 
 	r := chi.NewMux()
 
-	r.Use(middleware.Logger, middleware.Recoverer)
+	r.Use(middleware.Logger, middleware.Recoverer, middleware.RealIP, middleware.RequestID, middleware.Timeout(60*time.Second))
 
 	// Webhook route
 	r.HandleFunc("/kittycat", webhookRoute)
