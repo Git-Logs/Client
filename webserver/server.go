@@ -425,7 +425,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get channel ID from database
-	rows, err := pool.Query(ctx, "SELECT channel_id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id)
+	rows, err := pool.Query(ctx, "SELECT channel_id FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id)
 
 	if err != nil {
 		fmt.Println(err)
