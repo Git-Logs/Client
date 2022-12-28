@@ -73,7 +73,7 @@ async fn _embed_help(
 
             let _ = writeln!(
                 menu,
-                "/{cmd_name} | ibb!{cmd_name} - {desc}",
+                "/{cmd_name} | git!{cmd_name} - {desc}",
                 cmd_name = command.name,
                 desc = command
                     .description

@@ -19,19 +19,7 @@ pub struct Data {
     pub pool: sqlx::PgPool,
 }
 
-/// Displays your or another user's account creation date
-#[poise::command(slash_command, prefix_command)]
-async fn age(
-    ctx: Context<'_>,
-    #[description = "Selected user"] user: Option<serenity::User>,
-) -> Result<(), Error> {
-    let u = user.as_ref().unwrap_or_else(|| ctx.author());
-    let response = format!("{}'s account was created at {}", u.name, u.created_at());
-    ctx.say(response).await?;
-    Ok(())
-}
-
-#[poise::command(prefix_command)]
+#[poise::command(prefix_command, hide_in_help)]
 async fn register(ctx: Context<'_>) -> Result<(), Error> {
     poise::builtins::register_application_commands_buttons(ctx).await?;
     Ok(())
@@ -129,7 +117,6 @@ async fn main() {
             },
             listener: |event, _ctx, user_data| Box::pin(event_listener(event, user_data)),
             commands: vec![
-                age(),
                 register(),
                 help::simplehelp(),
                 help::help(),

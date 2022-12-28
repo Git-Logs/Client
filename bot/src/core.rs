@@ -148,6 +148,8 @@ pub async fn newhook(
     .execute(&data.pool)
     .await?;
 
+    ctx.say("Webhook created! Trying to DM you the credentials...").await?;
+
     // Create a new dm channel with the user if not slash command
     let dm_channel = ctx.author().create_dm_channel(&ctx).await;
 
@@ -172,6 +174,8 @@ Set the `Secret` field to `{webh_secret}`.
 When creating repositories, use `{id}` as the ID
             
 **Note that the above URL and secret is unique and should not be shared with others**
+
+**Delete this message after you're done!**
                 ",
                 respond_url=std::env::var("RESPOND_URL").unwrap(),
                 id=id,
@@ -251,8 +255,8 @@ pub async fn newrepo(
             sqlx::query!(
                 "INSERT INTO repos (id, webhook_id, repo_name, channel_id, guild_id) VALUES ($1, $2, $3, $4, $5)",
                 id,
-                (owner+"/"+&name).to_lowercase(),
                 webhook_id,
+                (owner+"/"+&name).to_lowercase(),
                 channel.to_string(),
                 ctx.guild_id().unwrap().to_string()
             )
