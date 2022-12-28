@@ -110,6 +110,8 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 	var messageSend discordgo.MessageSend
 
+	fmt.Println(header)
+
 	switch header {
 
 	case "push":
