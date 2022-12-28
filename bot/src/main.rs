@@ -3,7 +3,7 @@ use std::{time::Duration};
 use dotenv::dotenv;
 use log::{error, info};
 use poise::serenity_prelude::{
-    self as serenity, FullEvent,
+    self as serenity, FullEvent, UserId,
 };
 use sqlx::postgres::PgPoolOptions;
 
@@ -108,9 +108,19 @@ async fn main() {
             serenity::GatewayIntents::MESSAGE_CONTENT | serenity::GatewayIntents::GUILD_MESSAGES | serenity::GatewayIntents::GUILDS
         );
 
+    let owners = std::env::var("OWNERS")
+        .expect("missing OWNERS")
+        .split(',')
+        .map(|x| x.parse::<UserId>().expect("invalid owner"))
+        .collect::<Vec<_>>();
+
+    // Convert to hashset of HashSet<UserId>
+    let owners = owners.into_iter().collect::<std::collections::HashSet<_>>();
+
     let framework = poise::Framework::new(
         poise::FrameworkOptions {
-            initialize_owners: true,
+            owners,
+            initialize_owners: false,
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("git!".into()),
                 ..poise::PrefixFrameworkOptions::default()
