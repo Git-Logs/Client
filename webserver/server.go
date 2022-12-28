@@ -116,6 +116,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		for _, commit := range gh.Commits {
 			fmt.Println(commit.Author)
 
+			// If the username is empty, use the name instead
 			if commit.Author.Username == "" {
 				commit.Author.Username = commit.Author.Name
 			}
