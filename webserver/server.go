@@ -114,6 +114,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	case "push":
 		var commitList string
 		for _, commit := range gh.Commits {
+			fmt.Println(commit.Author)
 			commitList += fmt.Sprintf("%s [``%s``](%s) | [%s](%s)\n", commit.Message, commit.ID[:7], commit.URL, commit.Author.Username, "https://github.com/"+commit.Author.Username)
 		}
 
