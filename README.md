@@ -14,6 +14,8 @@ Github v2 is the rewrite of the original Github webhook logger.
 - `check_suite`
 - `status`
 
+More events will be added in the future.
+
 ## The Stack
 
 - bot -> the frontend bot that allows configuration of the webhook logger
