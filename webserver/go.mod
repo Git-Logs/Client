@@ -8,7 +8,6 @@ require (
 	github.com/jackc/pgx/v5 v5.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12
-	github.com/spewerspew/spew v0.0.0-20220201233537-1fb8bf5ed3d2
 )
 
 require (

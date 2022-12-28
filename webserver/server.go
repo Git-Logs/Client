@@ -20,7 +20,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/spewerspew/spew"
 )
 
 var (
@@ -84,9 +83,9 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var gh GithubWebhook
+	var rw RepoWrapper
 
-	err = json.Unmarshal(bodyBytes, &gh)
+	err = json.Unmarshal(bodyBytes, &rw)
 
 	if err != nil {
 		fmt.Println(err)
@@ -98,7 +97,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	var header = r.Header.Get("X-GitHub-Event")
 
 	// Get repo_name from database
-	err = pool.QueryRow(ctx, "SELECT repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id).Scan(&repoName)
+	err = pool.QueryRow(ctx, "SELECT repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoName)
 
 	if err != nil {
 		fmt.Println(err)
@@ -135,13 +134,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		messageSend, err = events.StatusFn(bodyBytes)
 	default:
 		messageSend = discordgo.MessageSend{
-			Content: "**Action: " + header + "**",
-			TTS:     false,
-			File: &discordgo.File{
-				Name:        "gh-event.txt",
-				ContentType: "application/octet-stream",
-				Reader:      strings.NewReader(spew.Sdump(gh)),
-			},
+			Content: "This event is not supported yet: " + header,
 		}
 	}
 
@@ -153,7 +146,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get channel ID from database
-	rows, err := pool.Query(ctx, "SELECT channel_id FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(gh.Repo.FullName), id)
+	rows, err := pool.Query(ctx, "SELECT channel_id FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id)
 
 	if err != nil {
 		fmt.Println(err)
