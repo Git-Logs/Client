@@ -19,7 +19,7 @@ type PullRequestReviewCommentEvent struct {
 	} `json:"comment"`
 }
 
-func PullRequestReviewCommentFn(bytes []byte) (discordgo.MessageSend, error) {
+func pullRequestReviewCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh PullRequestReviewCommentEvent
 
 	// Unmarshal the JSON into our struct

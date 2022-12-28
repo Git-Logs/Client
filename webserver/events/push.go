@@ -29,7 +29,7 @@ type PushEvent struct {
 	BaseRef string `json:"base_ref"`
 }
 
-func PushFn(bytes []byte) (discordgo.MessageSend, error) {
+func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh PushEvent
 
 	// Unmarshal the JSON into our struct

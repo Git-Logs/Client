@@ -27,7 +27,7 @@ type StatusEvent struct {
 	} `json:"commit"`
 }
 
-func StatusFn(bytes []byte) (discordgo.MessageSend, error) {
+func statusFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh StatusEvent
 
 	// Unmarshal the JSON into our struct

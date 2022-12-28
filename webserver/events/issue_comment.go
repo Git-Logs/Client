@@ -18,7 +18,7 @@ type IssueCommentEvent struct {
 	} `json:"comment"`
 }
 
-func IssueCommentFn(bytes []byte) (discordgo.MessageSend, error) {
+func issueCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh IssueCommentEvent
 
 	// Unmarshal the JSON into our struct

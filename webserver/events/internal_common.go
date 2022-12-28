@@ -1,8 +1,23 @@
 package events
 
-import jsoniter "github.com/json-iterator/go"
+import (
+	"github.com/bwmarrin/discordgo"
+	jsoniter "github.com/json-iterator/go"
+)
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, error){
+	"check_suite":                 checkSuiteFn,
+	"create":                      createFn,
+	"issues":                      issuesFn,
+	"issue_comment":               issueCommentFn,
+	"pull_request":                pullRequestFn,
+	"pull_request_review_comment": pullRequestReviewCommentFn,
+	"push":                        pushFn,
+	"star":                        starFn,
+	"status":                      statusFn,
+}
 
 type User struct {
 	Login            string `json:"login"`
@@ -51,15 +66,15 @@ type PullRequestCommit struct {
 }
 
 type PullRequest struct {
-	ID      int                   `json:"id"`
-	Number  int                   `json:"number"`
-	State   string                `json:"state"`
-	Locked  bool                  `json:"locked"`
-	Title   string                `json:"title"`
-	Body    string                `json:"body"`
-	HTMLURL string                `json:"html_url"`
-	URL     string                `json:"url"`
-	User    User                  `json:"user"`
+	ID      int               `json:"id"`
+	Number  int               `json:"number"`
+	State   string            `json:"state"`
+	Locked  bool              `json:"locked"`
+	Title   string            `json:"title"`
+	Body    string            `json:"body"`
+	HTMLURL string            `json:"html_url"`
+	URL     string            `json:"url"`
+	User    User              `json:"user"`
 	Base    PullRequestCommit `json:"base"`
 	Head    PullRequestCommit `json:"head"`
 }

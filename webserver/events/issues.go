@@ -9,11 +9,11 @@ import (
 type IssuesEvent struct {
 	Action string     `json:"action"`
 	Repo   Repository `json:"repository"`
-	Sender User     `json:"sender"`
+	Sender User       `json:"sender"`
 	Issue  Issue      `json:"issue"`
 }
 
-func IssuesFn(bytes []byte) (discordgo.MessageSend, error) {
+func issuesFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh IssuesEvent
 
 	// Unmarshal the JSON into our struct
@@ -49,21 +49,21 @@ func IssuesFn(bytes []byte) (discordgo.MessageSend, error) {
 					IconURL: gh.Sender.AvatarURL,
 				},
 				Description: body,
-				Title: fmt.Sprintf("Issue %s on %s (#%d)", gh.Action, gh.Repo.FullName, gh.Issue.Number),
+				Title:       fmt.Sprintf("Issue %s on %s (#%d)", gh.Action, gh.Repo.FullName, gh.Issue.Number),
 				Fields: []*discordgo.MessageEmbedField{
 					{
-						Name:  "Action",
-						Value: gh.Action,
+						Name:   "Action",
+						Value:  gh.Action,
 						Inline: true,
 					},
 					{
-						Name:  "User",
-						Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						Name:   "User",
+						Value:  fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
 						Inline: true,
 					},
 					{
-						Name:  "Title",
-						Value: gh.Issue.Title,
+						Name:   "Title",
+						Value:  gh.Issue.Title,
 						Inline: true,
 					},
 				},

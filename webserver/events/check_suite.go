@@ -38,7 +38,7 @@ type CheckSuiteEvent struct {
 	} `json:"check_suite"`
 }
 
-func CheckSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
+func checkSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh CheckSuiteEvent
 
 	// Unmarshal the JSON into our struct

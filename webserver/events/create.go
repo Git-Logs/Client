@@ -15,7 +15,7 @@ type CreateEvent struct {
 	PusherType   string     `json:"pusher_type"`
 }
 
-func CreateFn(bytes []byte) (discordgo.MessageSend, error) {
+func createFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh CreateEvent
 
 	// Unmarshal the JSON into our struct

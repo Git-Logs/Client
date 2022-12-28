@@ -10,7 +10,7 @@ type StarEvent struct {
 	Sender User       `json:"sender"`
 }
 
-func StarFn(bytes []byte) (discordgo.MessageSend, error) {
+func starFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh StarEvent
 
 	// Unmarshal the JSON into our struct

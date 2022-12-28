@@ -13,7 +13,7 @@ type PullRequestEvent struct {
 	PullRequest PullRequest `json:"pull_request"`
 }
 
-func PullRequestFn(bytes []byte) (discordgo.MessageSend, error) {
+func pullRequestFn(bytes []byte) (discordgo.MessageSend, error) {
 	var gh PullRequestEvent
 
 	// Unmarshal the JSON into our struct
