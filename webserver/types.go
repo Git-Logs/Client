@@ -1,10 +1,14 @@
 package main
 
 type GithubWebhook struct {
-	Ref     string `json:"ref"`
-	BaseRef string `json:"base_ref,omitempty"`
-	Action  string `json:"action"`
-	Commits []struct {
+	Ref          string     `json:"ref"`           // common
+	MasterBranch string     `json:"master_branch"` // create
+	Description  string     `json:"description"`   // create
+	PusherType   string     `json:"pusher_type"`   // create
+	RefType      string     `json:"ref_type"`      // create
+	BaseRef      string     `json:"base_ref,omitempty"`
+	Action       string     `json:"action"`
+	Commits      []struct { // push
 		ID        string `json:"id"`
 		Message   string `json:"message"`
 		Timestamp string `json:"timestamp"`
@@ -15,7 +19,7 @@ type GithubWebhook struct {
 			Username string `json:"username"`
 		} `json:"author"`
 	}
-	Repo struct {
+	Repo struct { // common
 		ID          int    `json:"id"`
 		Name        string `json:"name"`
 		FullName    string `json:"full_name"`
@@ -32,11 +36,11 @@ type GithubWebhook struct {
 		HTMLURL    string `json:"html_url"`
 		CommitsURL string `json:"commits_url"`
 	} `json:"repository"`
-	Pusher struct {
+	Pusher struct { // push
 		Name        string `json:"name"`
 		Description string `json:"description"`
 	} `json:"pusher,omitempty"`
-	Sender struct {
+	Sender struct { // common
 		Login            string `json:"login"`
 		ID               int    `json:"id"`
 		AvatarURL        string `json:"avatar_url"`
@@ -44,7 +48,7 @@ type GithubWebhook struct {
 		HTMLURL          string `json:"html_url"`
 		OrganizationsURL string `json:"organizations_url"`
 	} `json:"sender,omitempty"`
-	HeadCommit struct {
+	HeadCommit struct { // common
 		ID      string `json:"id"`
 		Message string `json:"message"`
 		Author  struct {

@@ -376,6 +376,43 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 				},
 			},
 		}
+
+	case "create":
+		messageSend = discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Color: 0x00ff1a,
+					URL:   gh.Repo.HTMLURL,
+					Author: &discordgo.MessageEmbedAuthor{
+						Name:    gh.Sender.Login,
+						IconURL: gh.Sender.AvatarURL,
+					},
+					Title: "New " + gh.RefType + " created on " + gh.Repo.FullName,
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:  "User",
+							Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						},
+						{
+							Name:  "Ref",
+							Value: gh.Ref,
+						},
+						{
+							Name:  "Ref Type",
+							Value: gh.RefType,
+						},
+						{
+							Name:  "Master Branch",
+							Value: gh.MasterBranch,
+						},
+						{
+							Name:  "Pusher Type",
+							Value: gh.PusherType,
+						},
+					},
+				},
+			},
+		}
 	default:
 		messageSend = discordgo.MessageSend{
 			Content: "**Action: " + header + "**",
