@@ -1,6 +1,6 @@
-# Github-v2
+# Git Logs
 
-Github v2 is the rewrite of the original Github webhook logger.
+Rewrite of the original Github webhook logger (Git Logs).
 
 ## Supported Events
 
