@@ -446,6 +446,48 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
+	case "status":
+		var moreInfoMsg string
+		if gh.TargetURL != "" {
+			moreInfoMsg = "\n\nFor more information, [click here](" + gh.TargetURL + ")."
+		}
+
+		if gh.Context == "" {
+			gh.Context = "-"
+		}
+
+		messageSend = discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Color: 0x00ff1a,
+					URL:   gh.Repo.HTMLURL,
+					Author: &discordgo.MessageEmbedAuthor{
+						Name:    gh.Sender.Login,
+						IconURL: gh.Sender.AvatarURL,
+					},
+					Title: "Status " + gh.State + " on " + gh.Repo.FullName,
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:  "User",
+							Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						},
+						{
+							Name:  "Description",
+							Value: gh.Description + moreInfoMsg,
+						},
+						{
+							Name:  "Context",
+							Value: gh.Context,
+						},
+						{
+							Name:  "Target URL",
+							Value: gh.TargetURL,
+						},
+					},
+				},
+			},
+		}
+
 	default:
 		messageSend = discordgo.MessageSend{
 			Content: "**Action: " + header + "**",

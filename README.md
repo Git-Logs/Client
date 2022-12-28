@@ -12,6 +12,7 @@ Github v2 is the rewrite of the original Github webhook logger.
 - `pull_request_review_comment`
 - `create`
 - `check_suite`
+- `status`
 
 - bot -> the frontend bot that allows configuration of the webhook logger
 - webserver -> the webserver that hosts the webhook logger

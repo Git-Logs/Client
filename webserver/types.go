@@ -4,6 +4,10 @@ type GithubWebhook struct {
 	Ref          string         `json:"ref"`           // common
 	MasterBranch string         `json:"master_branch"` // create
 	Description  string         `json:"description"`   // create
+	Context      string         `json:"context"`       // status
+	State        string         `json:"state"`         // status
+	TargetURL    string         `json:"target_url"`    // status
+	Name         string         `json:"name"`          // status
 	PusherType   string         `json:"pusher_type"`   // create
 	RefType      string         `json:"ref_type"`      // create
 	BaseRef      string         `json:"base_ref,omitempty"`
