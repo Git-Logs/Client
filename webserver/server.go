@@ -412,6 +412,40 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 				},
 			},
 		}
+
+	case "check_suite":
+		messageSend = discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Color: 0x00ff1a,
+					URL:   gh.Repo.HTMLURL,
+					Author: &discordgo.MessageEmbedAuthor{
+						Name:    gh.Sender.Login,
+						IconURL: gh.Sender.AvatarURL,
+					},
+					Title: "Check Suite " + gh.Action + " on " + gh.Repo.FullName,
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:  "User",
+							Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						},
+						{
+							Name:  "Status",
+							Value: gh.CheckSuite.Status,
+						},
+						{
+							Name:  "Conclusion",
+							Value: gh.CheckSuite.Conclusion,
+						},
+						{
+							Name:  "URL",
+							Value: gh.CheckSuite.URL,
+						},
+					},
+				},
+			},
+		}
+
 	default:
 		messageSend = discordgo.MessageSend{
 			Content: "**Action: " + header + "**",

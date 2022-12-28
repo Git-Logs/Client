@@ -1,14 +1,41 @@
 package main
 
 type GithubWebhook struct {
-	Ref          string     `json:"ref"`           // common
-	MasterBranch string     `json:"master_branch"` // create
-	Description  string     `json:"description"`   // create
-	PusherType   string     `json:"pusher_type"`   // create
-	RefType      string     `json:"ref_type"`      // create
-	BaseRef      string     `json:"base_ref,omitempty"`
-	Action       string     `json:"action"`
-	Commits      []struct { // push
+	Ref          string         `json:"ref"`           // common
+	MasterBranch string         `json:"master_branch"` // create
+	Description  string         `json:"description"`   // create
+	PusherType   string         `json:"pusher_type"`   // create
+	RefType      string         `json:"ref_type"`      // create
+	BaseRef      string         `json:"base_ref,omitempty"`
+	Action       string         `json:"action"` // common
+	ActionsMeta  map[string]any `json:"actions_meta,omitempty"`
+	CheckSuite   struct {
+		ID         int    `json:"id"`
+		After      string `json:"after,omitempty"`
+		HeadBranch string `json:"head_branch,omitempty"`
+		HeadSHA    string `json:"head_sha,omitempty"`
+		Status     string `json:"status,omitempty"`
+		Conclusion string `json:"conclusion,omitempty"`
+		URL        string `json:"url,omitempty"`
+		Before     string `json:"before,omitempty"`
+		HeadCommit struct {
+			ID        string `json:"id,omitempty"`
+			TreeID    string `json:"tree_id,omitempty"`
+			Message   string `json:"message,omitempty"`
+			Timestamp string `json:"timestamp,omitempty"`
+			Author    struct {
+				Name     string `json:"name,omitempty"`
+				Email    string `json:"email,omitempty"`
+				Username string `json:"username,omitempty"`
+			} `json:"author,omitempty"`
+			Committer struct {
+				Name     string `json:"name,omitempty"`
+				Email    string `json:"email,omitempty"`
+				Username string `json:"username,omitempty"`
+			} `json:"committer,omitempty"`
+		} `json:"head_commit,omitempty"`
+	} `json:"check_suite,omitempty"`
+	Commits []struct { // push
 		ID        string `json:"id"`
 		Message   string `json:"message"`
 		Timestamp string `json:"timestamp"`
