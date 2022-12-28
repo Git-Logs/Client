@@ -1,0 +1,7 @@
+**/target
+**/.env
+**/.vscode
+.env
+bot/bot
+bot/bot.new
+webserver/webserver
