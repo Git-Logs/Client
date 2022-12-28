@@ -121,7 +121,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 				commit.Author.Username = commit.Author.Name
 			}
 
-			commitList += fmt.Sprintf("%s [``%s``](%s) | [%s](%s)\n", commit.Message, commit.ID[:7], commit.URL, commit.Author.Username, "https://github.com/"+commit.Author.Username)
+			commitList += fmt.Sprintf("%s [``%s``](%s) | [%s](%s)\n", commit.Message, commit.ID[:7], commit.URL, commit.Author.Username, strings.ReplaceAll("https://github.com/"+commit.Author.Username, " ", "%20"))
 		}
 
 		messageSend = discordgo.MessageSend{
