@@ -132,7 +132,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		messageSend, err = events.CheckSuiteFn(bodyBytes)
 
 	case "status":
-
+		messageSend, err = events.StatusFn(bodyBytes)
 	default:
 		messageSend = discordgo.MessageSend{
 			Content: "**Action: " + header + "**",
@@ -143,6 +143,13 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 				Reader:      strings.NewReader(spew.Sdump(gh)),
 			},
 		}
+	}
+
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(400)
+		w.Write([]byte("This request is not a valid JSON:" + err.Error()))
+		return
 	}
 
 	// Get channel ID from database

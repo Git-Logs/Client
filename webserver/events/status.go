@@ -18,7 +18,7 @@ type StatusEvent struct {
 		SHA     string `json:"sha"`
 		Author  struct {
 			Login   string `json:"login"`
-			HTMLURL string `json:"html_url"`
+			HTMLURL string `json:"html_url"` // user
 		} `json:"author"`
 		Commit struct {
 			ID      string `json:"id"`
@@ -60,7 +60,7 @@ func StatusFn(bytes []byte) (discordgo.MessageSend, error) {
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "Commit",
-						Value: fmt.Sprintf("[``%s``](%s) - %s | [%s](%s)", gh.Commit.SHA[:7], gh.Commit.HTMLURL, gh.Commit.Commit.Message, gh.Commit.Author.Login, gh.Commit.HTMLURL),
+						Value: fmt.Sprintf("[``%s``](%s) - %s | [%s](%s)", gh.Commit.SHA[:7], gh.Commit.HTMLURL, gh.Commit.Commit.Message, gh.Commit.Author.Login, gh.Commit.Author.HTMLURL),
 					},
 					{
 						Name:   "User",
