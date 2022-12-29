@@ -30,7 +30,7 @@ func deleteFn(bytes []byte) (discordgo.MessageSend, error) {
 				Color:  colorRed,
 				URL:    gh.Repo.HTMLURL,
 				Author: gh.Sender.AuthorEmbed(),
-				Title:  "Removed branch " + gh.RefType + " from " + gh.Repo.FullName,
+				Title:  "Removed " + gh.RefType + " from " + gh.Repo.FullName,
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",
