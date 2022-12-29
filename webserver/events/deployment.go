@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type DeploymentEvent struct {
@@ -21,6 +19,7 @@ type DeploymentEvent struct {
 		OriginalEnvironment   string    `json:"original_environment"`
 		Environment           string    `json:"environment"`
 		ProductionEnvironment bool      `json:"production_environment"`
+		TransientEnvironment  bool      `json:"transient_environment"`
 		StatusesUrl           string    `json:"statuses_url"`
 	} `json:"deployment"`
 }
@@ -36,7 +35,7 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 	}
 
 	var color int
-	var title string = cases.Title(language.English).String(gh.Action) + " deployment on " + gh.Repo.FullName
+	var title string = "Deployment " + gh.Action + " on " + gh.Repo.FullName
 	if gh.Action == "created" || gh.Action == "edited" {
 		color = 0x00ff1a
 	} else {
@@ -80,6 +79,11 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 					{
 						Name:   "Is Production",
 						Value:  fmt.Sprintf("%t", gh.Deployment.ProductionEnvironment),
+						Inline: true,
+					},
+					{
+						Name:   "Is Transient Environment",
+						Value:  fmt.Sprintf("%t", gh.Deployment.TransientEnvironment),
 						Inline: true,
 					},
 				},
