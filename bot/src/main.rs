@@ -104,10 +104,10 @@ async fn main() {
 
     if let Ok(v) = std::env::var("PROXY_URL") {
         info!("Setting proxy url to {}", v);
-        http.proxy(&v).expect("proxy error").ratelimiter_disabled(true);
+        http.proxy(&v).ratelimiter_disabled(true);
     }    
 
-    let http = http.build();
+    let http = http.build().expect("proxy error");
 
     let client_builder =
         serenity::ClientBuilder::new_with_http(
