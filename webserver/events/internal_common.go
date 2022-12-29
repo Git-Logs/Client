@@ -1,6 +1,8 @@
 package events
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -21,6 +23,7 @@ var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, erro
 	"commit_comment":              commitCommentFn,
 	"deployment":                  deploymentFn,
 	"deployment_status":           deploymentStatusFn,
+	"workflow_run":                workflowRunFn,
 }
 
 type User struct {
@@ -37,6 +40,10 @@ func (u User) AuthorEmbed() *discordgo.MessageEmbedAuthor {
 		Name:    u.Login,
 		IconURL: u.AvatarURL,
 	}
+}
+
+func (u User) Link() string {
+	return "[" + strings.ReplaceAll(u.Login, " ", "%20") + "](" + u.HTMLURL + ")"
 }
 
 type Repository struct {
