@@ -64,7 +64,7 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "User",
-						Value:  "[" + gh.Sender.Login + "]" + "(" + gh.Sender.HTMLURL + ")",
+						Value:  gh.Sender.Link(),
 						Inline: true,
 					},
 					{

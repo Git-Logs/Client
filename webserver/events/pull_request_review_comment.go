@@ -1,7 +1,6 @@
 package events
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
@@ -66,7 +65,7 @@ func pullRequestReviewCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",
-						Value: fmt.Sprintf("[%s](%s)", gh.Comment.User.Login, gh.Comment.User.HTMLURL),
+						Value: gh.Comment.User.Link(),
 					},
 					{
 						Name:  "Title",

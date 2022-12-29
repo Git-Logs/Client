@@ -1,8 +1,6 @@
 package events
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -34,7 +32,7 @@ func deleteFn(bytes []byte) (discordgo.MessageSend, error) {
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",
-						Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						Value: gh.Sender.Link(),
 					},
 					{
 						Name:   "Ref",

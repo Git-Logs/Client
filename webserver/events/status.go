@@ -61,7 +61,7 @@ func statusFn(bytes []byte) (discordgo.MessageSend, error) {
 					},
 					{
 						Name:   "User",
-						Value:  fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						Value:  gh.Sender.Link(),
 						Inline: true,
 					},
 					{
