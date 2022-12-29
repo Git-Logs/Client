@@ -22,7 +22,7 @@ See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-eve
 - `deployment`
 - `deployment_status`
 - `workflow_run`
-- `dependabot`
+- `dependabot_alert`
 
 **More coming soon**
 

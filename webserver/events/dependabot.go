@@ -2,7 +2,7 @@ package events
 
 import "github.com/bwmarrin/discordgo"
 
-type DependabotEvent struct {
+type DependabotAlertEvent struct {
 	Action string     `json:"action"`
 	Repo   Repository `json:"repository"`
 	Sender User       `json:"sender"`
@@ -36,8 +36,8 @@ type DependabotEvent struct {
 	} `json:"alert"`
 }
 
-func dependabotFn(bytes []byte) (discordgo.MessageSend, error) {
-	var gh DependabotEvent
+func dependabotAlertFn(bytes []byte) (discordgo.MessageSend, error) {
+	var gh DependabotAlertEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
