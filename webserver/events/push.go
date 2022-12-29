@@ -48,6 +48,10 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 			commit.Author.Username = commit.Author.Name
 		}
 
+		if len(commit.Message) > 100 {
+			commit.Message = commit.Message[:100] + "..."
+		}
+
 		commitList += fmt.Sprintf("%s [``%s``](%s) | [%s](%s)\n", commit.Message, commit.ID[:7], commit.URL, commit.Author.Username, strings.ReplaceAll("https://github.com/"+commit.Author.Username, " ", "%20"))
 	}
 

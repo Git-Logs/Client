@@ -35,6 +35,10 @@ func starFn(bytes []byte) (discordgo.MessageSend, error) {
 				Color: color,
 				URL:   gh.Repo.URL,
 				Title: title,
+				Author: &discordgo.MessageEmbedAuthor{
+					Name:    gh.Sender.Login,
+					IconURL: gh.Sender.AvatarURL,
+				},
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",
