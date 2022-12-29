@@ -17,6 +17,7 @@ type DeploymentStatusEvent struct {
 		Description    string    `json:"description"`
 		EnvironmentURL string    `json:"environment_url"`
 		LogURL         string    `json:"log_url"`
+		TargetURL      string    `json:"target_url"`
 	} `json:"deployment_status"`
 	Deployment struct {
 		Task        string `json:"task"`
@@ -63,6 +64,12 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.DeploymentStatus.LogURL = "[Click here](" + gh.DeploymentStatus.LogURL + ")"
 	}
 
+	if gh.DeploymentStatus.TargetURL == "" {
+		gh.DeploymentStatus.TargetURL = "No URL available"
+	} else {
+		gh.DeploymentStatus.TargetURL = "[Click here](" + gh.DeploymentStatus.TargetURL + ")"
+	}
+
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
@@ -96,6 +103,11 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 					{
 						Name:   "Log URL",
 						Value:  gh.DeploymentStatus.LogURL,
+						Inline: true,
+					},
+					{
+						Name:   "Target URL",
+						Value:  gh.DeploymentStatus.TargetURL,
 						Inline: true,
 					},
 				},
