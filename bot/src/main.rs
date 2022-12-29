@@ -3,9 +3,10 @@ use std::{time::Duration};
 use dotenv::dotenv;
 use log::{error, info};
 use poise::serenity_prelude::{
-    self as serenity, FullEvent, UserId,
+    self as prelude, FullEvent, UserId,
 };
 use sqlx::postgres::PgPoolOptions;
+use serenity::gateway::ActivityData;
 
 mod help;
 mod core;
@@ -75,7 +76,7 @@ async fn event_listener(event: &FullEvent, _user_data: &Data) -> Result<(), Erro
         }
         FullEvent::Ready {
             data_about_bot,
-            ctx: _,
+            ctx,
         } => {
             // Always wait a bit here for cache to finish up
             tokio::time::sleep(Duration::from_secs(2)).await;
@@ -84,6 +85,9 @@ async fn event_listener(event: &FullEvent, _user_data: &Data) -> Result<(), Erro
                 "{} is ready!",
                 data_about_bot.user.name
             );
+
+            // Set activity
+            ctx.set_activity(Some(ActivityData::playing("git!help")));
         }
         _ => {}
     }
@@ -100,7 +104,7 @@ async fn main() {
     env_logger::init();
 
     let mut http =
-        serenity::HttpBuilder::new(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"));
+        prelude::HttpBuilder::new(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"));
 
     if let Ok(v) = std::env::var("PROXY_URL") {
         info!("Setting proxy url to {}", v);
@@ -110,9 +114,9 @@ async fn main() {
     let http = http.build();
 
     let client_builder =
-        serenity::ClientBuilder::new_with_http(
+        prelude::ClientBuilder::new_with_http(
             http, 
-            serenity::GatewayIntents::MESSAGE_CONTENT | serenity::GatewayIntents::GUILD_MESSAGES | serenity::GatewayIntents::GUILDS
+            prelude::GatewayIntents::MESSAGE_CONTENT | prelude::GatewayIntents::GUILD_MESSAGES | prelude::GatewayIntents::GUILDS
         );
 
     let owners = std::env::var("OWNERS")

@@ -26,3 +26,13 @@ indexmap = { version = "1.9.1", features = ["serde"] }
 version = "1"
 default-features = true
 features = ["fs", "macros", "rt", "sync", "time", "rt-multi-thread"]
+
+# https://github.com/serenity-rs/poise/blob/serenity-next/Cargo.toml#LL22-L29
+[dependencies.serenity]
+default-features = false
+features = ["builder", "client", "gateway", "model", "utils", "collector", "framework"]
+
+# version = "0.11.5"
+
+git = "https://github.com/serenity-rs/serenity"
+branch = "next"
