@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -67,9 +66,6 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Body != nil {
 		bodyBytes, _ = io.ReadAll(r.Body)
 	}
-
-	// Restore the io.ReadCloser to its original state
-	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	var signature = r.Header.Get("X-Hub-Signature-256")
 
