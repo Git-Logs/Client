@@ -138,6 +138,7 @@ async fn main() {
                 help::simplehelp(),
                 help::help(),
                 core::list(),
+                core::cmdref(),
                 core::newhook(),
                 core::newrepo(),
                 core::delhook(),

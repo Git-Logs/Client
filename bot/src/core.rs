@@ -4,6 +4,38 @@ use rand::{distributions::{Alphanumeric, DistString}};
 
 use crate::{Context, Error};
 
+/// Command reference
+#[poise::command(slash_command, prefix_command, guild_only)]
+pub async fn cmdref(
+    ctx: Context<'_>,
+) -> Result<(), Error> {
+    ctx.say(
+        "
+- **newhook:** newhook <comment>
+
+EX: ``newhook 'My new webhook'``
+
+- **delhook:** delhook <webhook id>
+
+EX: ``delhook ID``
+
+- **list:** list
+
+EX: ``list``
+
+- **newrepo:** newrepo <webhook id> <repo org/owner> <repo name> <channel_id>
+
+EX: ``newrepo ID Git-Logs MyRepo #github``
+
+- **delrepo:** delrepo <repo id>
+
+EX: ``delrepo ID``
+        "
+    ).await?;
+
+    Ok(())
+}
+
 /// Lsts all webhooks in a guild with their respective repos and channel IDs
 #[poise::command(slash_command, prefix_command, guild_only, required_permissions = "MANAGE_GUILD")]
 pub async fn list(
