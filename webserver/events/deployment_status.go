@@ -39,9 +39,9 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 	var color int
 	var title string = "Deployment status update (" + gh.Action + ") on " + gh.Repo.FullName
 	if gh.Action == "created" || gh.Action == "edited" {
-		color = 0x00ff1a
+		color = colorGreen
 	} else {
-		color = 0xff0000
+		color = colorRed
 	}
 
 	if len(gh.Deployment.Description) > 0 {

@@ -51,7 +51,7 @@ func checkSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color:  0x00ff1a,
+				Color:  colorGreen,
 				URL:    gh.Repo.HTMLURL,
 				Author: gh.Sender.AuthorEmbed(),
 				Title:  "Check Suite " + gh.Action + " on " + gh.Repo.FullName,

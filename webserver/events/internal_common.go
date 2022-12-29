@@ -9,6 +9,12 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+var (
+	colorGreen   = 0x00ff1a
+	colorRed     = 0xff0000
+	colorDarkRed = 0x8b0000
+)
+
 var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, error){
 	"check_suite":                 checkSuiteFn,
 	"create":                      createFn,

@@ -23,10 +23,10 @@ func starFn(bytes []byte) (discordgo.MessageSend, error) {
 	var color int
 	var title string
 	if gh.Action == "created" {
-		color = 0x00ff1a
+		color = colorGreen
 		title = "Starred: " + gh.Repo.FullName
 	} else {
-		color = 0xff0000
+		color = colorRed
 		title = "Unstarred: " + gh.Repo.FullName
 	}
 	return discordgo.MessageSend{

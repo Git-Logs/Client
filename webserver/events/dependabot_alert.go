@@ -48,9 +48,9 @@ func dependabotAlertFn(bytes []byte) (discordgo.MessageSend, error) {
 
 	var color int
 	if gh.Action == "closed" {
-		color = 0xff0000
+		color = colorRed
 	} else {
-		color = 0x00ff1a
+		color = colorGreen
 	}
 
 	var details = gh.Alert.Dependency.Package.Name + " (" + gh.Alert.Dependency.Package.Ecosystem + ")"
@@ -71,7 +71,7 @@ func dependabotAlertFn(bytes []byte) (discordgo.MessageSend, error) {
 		details += "\n**Severity:** " + gh.Alert.SecurityAdvisory.Severity
 
 		if gh.Alert.SecurityAdvisory.Severity == "high" || gh.Alert.SecurityAdvisory.Severity == "critical" {
-			color = 0x8B0000
+			color = colorDarkRed
 		}
 	}
 

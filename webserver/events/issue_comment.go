@@ -49,9 +49,9 @@ func issueCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 
 	var color int
 	if gh.Action == "deleted" {
-		color = 0xff0000
+		color = colorRed
 	} else {
-		color = 0x00ff1a
+		color = colorGreen
 	}
 
 	return discordgo.MessageSend{
