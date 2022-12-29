@@ -79,10 +79,6 @@ func pullRequestReviewCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 						Name:  "Parent Issue",
 						Value: body,
 					},
-					{
-						Name:  "Comment",
-						Value: comment,
-					},
 				},
 			},
 		},

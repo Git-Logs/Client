@@ -28,15 +28,6 @@ func commitCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 		return discordgo.MessageSend{}, err
 	}
 
-	var body string = gh.Comment.Body
-	if len(gh.Comment.Body) > 1000 {
-		body = gh.Comment.Body[:1000]
-	}
-
-	if body == "" {
-		body = "No description available"
-	}
-
 	var comment string = gh.Comment.Body
 
 	if len(gh.Comment.Body) > 1000 {
@@ -74,11 +65,6 @@ func commitCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 					{
 						Name:   "Commit",
 						Value:  fmt.Sprintf("[%s](%s)", gh.Comment.CommitID[:7], gh.Repo.HTMLURL+"/commit/"+gh.Comment.CommitID),
-						Inline: true,
-					},
-					{
-						Name:   "Parent Issue",
-						Value:  body,
 						Inline: true,
 					},
 				},
