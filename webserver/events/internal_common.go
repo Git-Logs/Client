@@ -18,6 +18,7 @@ var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, erro
 	"star":                        starFn,
 	"status":                      statusFn,
 	"release":                     releaseFn,
+	"commit_comment":              commitCommentFn,
 }
 
 type User struct {

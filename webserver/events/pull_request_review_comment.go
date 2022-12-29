@@ -64,11 +64,12 @@ func pullRequestReviewCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 					Name:    gh.Sender.Login,
 					IconURL: gh.Sender.AvatarURL,
 				},
-				Title: "Pull Request Review Comment on " + gh.Repo.FullName + " (#" + strconv.Itoa(gh.PullRequest.Number) + ")",
+				Description: comment,
+				Title:       "Pull Request Review Comment on " + gh.Repo.FullName + " (#" + strconv.Itoa(gh.PullRequest.Number) + ")",
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",
-						Value: fmt.Sprintf("[%s](%s)", gh.Sender.Login, gh.Sender.HTMLURL),
+						Value: fmt.Sprintf("[%s](%s)", gh.Comment.User.Login, gh.Comment.User.HTMLURL),
 					},
 					{
 						Name:  "Title",

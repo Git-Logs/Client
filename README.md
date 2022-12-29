@@ -16,6 +16,7 @@ Rewrite of the original Github webhook logger (Git Logs).
 - `check_suite`
 - `status`
 - `release`
+- `commit_comment`
 
 **More coming soon**
 
