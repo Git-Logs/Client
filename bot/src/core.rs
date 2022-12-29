@@ -169,9 +169,9 @@ pub async fn newhook(
                 "
 Next, add the following webhook to your Github repositories (or organizations): `{respond_url}/kittycat?id={id}`
 
-Set the `Secret` field to `{webh_secret}`.
+Set the `Secret` field to `{webh_secret}` and ensure that Content Type is set to `application/json`. 
 
-When creating repositories, use `{id}` as the ID
+When creating repositories, use `{id}` as the ID.
             
 **Note that the above URL and secret is unique and should not be shared with others**
 
