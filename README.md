@@ -6,6 +6,8 @@ Rewrite of the original Github webhook logger (Git Logs).
 
 ## Supported Events
 
+See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) for a list of all events.
+
 - `push`
 - `star`
 - `issues`
@@ -20,6 +22,7 @@ Rewrite of the original Github webhook logger (Git Logs).
 - `deployment`
 - `deployment_status`
 - `workflow_run`
+- `dependabot`
 
 **More coming soon**
 
