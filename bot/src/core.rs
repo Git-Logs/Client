@@ -91,7 +91,7 @@ pub async fn list(
                 for webhook in webhooks {
                     // Get repos of webhook
                     let repos = sqlx::query!(
-                        "SELECT id, repo_name, channel_id, events FROM repos WHERE webhook_id = $1",
+                        "SELECT id, repo_name, channel_id, events FROM repos WHERE webhook_id = $1 ORDER BY created_at DESC",
                         webhook.id
                     )
                     .fetch_all(&data.pool)
@@ -417,6 +417,7 @@ pub async fn setrepoevents(
     .execute(&data.pool)
     .await?;
 
+    ctx.say("Events set!").await?;
 
     Ok(())
 }
@@ -451,6 +452,7 @@ pub async fn delrepoevents(
     .execute(&data.pool)
     .await?;
 
+    ctx.say("Events cleared!").await?;
 
     Ok(())
 }
@@ -486,6 +488,7 @@ pub async fn setrepochannel(
     .execute(&data.pool)
     .await?;
 
+    ctx.say("Channel updated!").await?;
 
     Ok(())
 }
