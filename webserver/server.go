@@ -30,7 +30,8 @@ var (
 )
 
 type RepoWrapper struct {
-	Repo events.Repository `json:"repository"`
+	Repo   events.Repository `json:"repository"`
+	Action string            `json:"action"`
 }
 
 func webhookRoute(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +43,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 	var secret string
 	var repoName string
+	var allowedEvents []string
 
 	id := r.URL.Query().Get("id")
 
@@ -101,7 +103,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	var header = r.Header.Get("X-GitHub-Event")
 
 	// Get repo_name from database
-	err = pool.QueryRow(ctx, "SELECT repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoName)
+	err = pool.QueryRow(ctx, "SELECT repo_name, events FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoName, &allowedEvents)
 
 	if err != nil {
 		fmt.Println(err)
@@ -113,6 +115,33 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	var messageSend discordgo.MessageSend
 
 	fmt.Println(header)
+
+	if len(allowedEvents) > 0 {
+		var gotAllowedEvent bool
+
+		// Check if we have this event in the allowed events
+		for _, evt := range allowedEvents {
+			evtSplit := strings.SplitN(evt, ".", 2)
+
+			if header == evtSplit[0] {
+				if len(evtSplit) > 1 {
+					if rw.Action == evtSplit[1] {
+						gotAllowedEvent = true
+						break
+					}
+				}
+
+				gotAllowedEvent = true
+				break
+			}
+		}
+
+		if !gotAllowedEvent {
+			w.WriteHeader(206)
+			w.Write([]byte("This event is not allowed for this repo"))
+			return
+		}
+	}
 
 	evtFn, ok := events.SupportedEvents[header]
 
