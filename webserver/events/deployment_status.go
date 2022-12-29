@@ -12,11 +12,11 @@ type DeploymentStatusEvent struct {
 	Repo             Repository `json:"repository"`
 	Sender           User       `json:"sender"`
 	DeploymentStatus struct {
-		Creator     User      `json:"creator"`
-		CreatedAt   time.Time `json:"created_at"`
-		Description string    `json:"description"`
-		DeployURL   string    `json:"deploy_url"`
-		LogURL      string    `json:"log_url"`
+		Creator        User      `json:"creator"`
+		CreatedAt      time.Time `json:"created_at"`
+		Description    string    `json:"description"`
+		EnvironmentURL string    `json:"environment_url"`
+		LogURL         string    `json:"log_url"`
 	} `json:"deployment_status"`
 	Deployment struct {
 		Task        string `json:"task"`
@@ -51,10 +51,10 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.DeploymentStatus.Description = gh.DeploymentStatus.Description[:996] + "..."
 	}
 
-	if gh.DeploymentStatus.DeployURL == "" {
-		gh.DeploymentStatus.DeployURL = "No URL available"
+	if gh.DeploymentStatus.EnvironmentURL == "" {
+		gh.DeploymentStatus.EnvironmentURL = "No URL available"
 	} else {
-		gh.DeploymentStatus.DeployURL = "[Click here](" + gh.DeploymentStatus.DeployURL + ")"
+		gh.DeploymentStatus.EnvironmentURL = "[Click here](" + gh.DeploymentStatus.EnvironmentURL + ")"
 	}
 
 	if gh.DeploymentStatus.LogURL == "" {
@@ -89,8 +89,8 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 						Inline: true,
 					},
 					{
-						Name:   "Deploy URL",
-						Value:  gh.DeploymentStatus.DeployURL,
+						Name:   "Environment URL",
+						Value:  gh.DeploymentStatus.EnvironmentURL,
 						Inline: true,
 					},
 					{
