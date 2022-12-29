@@ -1,4 +1,4 @@
-# Git Logs!
+# Git Logs
 
 Rewrite of the original Github webhook logger (Git Logs).
 
