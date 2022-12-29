@@ -60,6 +60,7 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 				Title:       title,
 				Author:      gh.Deployment.Creator.AuthorEmbed(),
 				Description: gh.Deployment.Description,
+				Timestamp:   gh.Deployment.CreatedAt.Format(time.RFC3339),
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "User",
