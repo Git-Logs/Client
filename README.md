@@ -59,4 +59,4 @@ You should ideally make this 2 systemd services in production.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details (once it is made)
+This project is licensed under the MIT License
