@@ -28,7 +28,7 @@ func releaseFn(bytes []byte) (discordgo.MessageSend, error) {
 	}
 
 	var color int
-	var title string = cases.Title(language.English).String(gh.Action) + " new release on " + gh.Repo.FullName
+	var title string = cases.Title(language.English).String(gh.Action) + " release on " + gh.Repo.FullName
 	if gh.Action == "created" || gh.Action == "published" || gh.Action == "edited" || gh.Action == "prereleased" || gh.Action == "released" {
 		color = 0x00ff1a
 	} else {
