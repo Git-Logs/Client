@@ -147,6 +147,9 @@ async fn main() {
                 core::newrepo(),
                 core::delhook(),
                 core::delrepo(),
+                core::setrepoevents(),
+                core::delrepoevents(),
+                core::setrepochannel(),
             ],
             /// This code is run before every command
             pre_command: |ctx| {
