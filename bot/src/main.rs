@@ -99,15 +99,15 @@ async fn main() {
 
     env_logger::init();
 
-    let http =
+    let mut http =
         serenity::HttpBuilder::new(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"));
 
     if let Ok(v) = std::env::var("PROXY_URL") {
         info!("Setting proxy url to {}", v);
-        http.proxy(&v).ratelimiter_disabled(true);
+        http = http.proxy(&v).ratelimiter_disabled(true);
     }    
 
-    let http = http.build().expect("proxy error");
+    let http = http.build();
 
     let client_builder =
         serenity::ClientBuilder::new_with_http(
