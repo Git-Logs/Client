@@ -15,6 +15,7 @@ Rewrite of the original Github webhook logger (Git Logs).
 - `create`
 - `check_suite`
 - `status`
+- `release`
 
 **More coming soon**
 
