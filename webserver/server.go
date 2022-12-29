@@ -75,7 +75,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 	if "sha256="+expected != signature {
 		w.WriteHeader(401)
-		w.Write([]byte("This request has a bad signature, recheck the secret"))
+		w.Write([]byte("This request has a bad signature, recheck the secret and ensure it isnt the id..."))
 		return
 	}
 
