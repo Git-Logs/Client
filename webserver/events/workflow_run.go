@@ -80,7 +80,7 @@ func workflowRunFn(bytes []byte) (discordgo.MessageSend, error) {
 					},
 					{
 						Name:   "Commit",
-						Value:  fmt.Sprintf("[%s](%s)", gh.WorkflowRun.HeadCommit.ID[:7], gh.Repo.HTMLURL+"/commit/"+gh.WorkflowRun.HeadCommit.ID),
+						Value:  gh.Repo.Commit(gh.WorkflowRun.HeadCommit.ID),
 						Inline: true,
 					},
 					{

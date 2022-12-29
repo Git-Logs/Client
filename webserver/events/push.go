@@ -82,8 +82,14 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 						Value: commitList,
 					},
 					{
-						Name:  "Pusher",
-						Value: fmt.Sprintf("[%s](%s)", gh.Pusher.Name, "https://github.com/"+gh.Pusher.Name),
+						Name:   "Commit Sender",
+						Value:  gh.Sender.Link(),
+						Inline: true,
+					},
+					{
+						Name:   "Pusher",
+						Value:  fmt.Sprintf("[%s](%s)", gh.Pusher.Name, "https://github.com/"+gh.Pusher.Name),
+						Inline: true,
 					},
 				},
 			},

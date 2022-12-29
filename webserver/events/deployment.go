@@ -74,7 +74,7 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 					},
 					{
 						Name:   "Commit",
-						Value:  fmt.Sprintf("[%s](%s)", gh.Deployment.SHA[:7], gh.Repo.HTMLURL+"/commit/"+gh.Deployment.SHA),
+						Value:  gh.Repo.Commit(gh.Deployment.SHA),
 						Inline: true,
 					},
 					{

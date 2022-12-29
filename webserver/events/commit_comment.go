@@ -1,8 +1,6 @@
 package events
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -61,7 +59,7 @@ func commitCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 					},
 					{
 						Name:   "Commit",
-						Value:  fmt.Sprintf("[%s](%s)", gh.Comment.CommitID[:7], gh.Repo.HTMLURL+"/commit/"+gh.Comment.CommitID),
+						Value:  gh.Repo.Commit(gh.Comment.CommitID),
 						Inline: true,
 					},
 				},

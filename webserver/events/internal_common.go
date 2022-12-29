@@ -65,6 +65,11 @@ type Repository struct {
 	CommitsURL  string `json:"commits_url"`
 }
 
+// Commit returns the commit URL for the given commit ID.
+func (r Repository) Commit(id string) string {
+	return "[" + id[:7] + "](" + r.HTMLURL + "/commit/" + id + ")"
+}
+
 type Issue struct {
 	ID      int    `json:"id"`
 	Number  int    `json:"number"`
