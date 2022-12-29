@@ -23,6 +23,7 @@ See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-eve
 - `deployment_status`
 - `workflow_run`
 - `dependabot_alert`
+- `delete`
 
 **More coming soon**
 

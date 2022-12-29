@@ -6,17 +6,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type CreateEvent struct {
-	Repo         Repository `json:"repository"`
-	Sender       User       `json:"sender"`
-	Ref          string     `json:"ref"`
-	RefType      string     `json:"ref_type"`
-	MasterBranch string     `json:"master_branch"`
-	PusherType   string     `json:"pusher_type"`
+type DeleteEvent struct {
+	Repo       Repository `json:"repository"`
+	Sender     User       `json:"sender"`
+	Ref        string     `json:"ref"`
+	RefType    string     `json:"ref_type"`
+	PusherType string     `json:"pusher_type"`
 }
 
-func createFn(bytes []byte) (discordgo.MessageSend, error) {
-	var gh CreateEvent
+func deleteFn(bytes []byte) (discordgo.MessageSend, error) {
+	var gh DeleteEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
@@ -28,10 +27,10 @@ func createFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color:  colorGreen,
+				Color:  colorRed,
 				URL:    gh.Repo.HTMLURL,
 				Author: gh.Sender.AuthorEmbed(),
-				Title:  "New " + gh.RefType + " created on " + gh.Repo.FullName,
+				Title:  "Removed branch " + gh.RefType + " from " + gh.Repo.FullName,
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",
@@ -45,11 +44,6 @@ func createFn(bytes []byte) (discordgo.MessageSend, error) {
 					{
 						Name:   "Ref Type",
 						Value:  gh.RefType,
-						Inline: true,
-					},
-					{
-						Name:   "Master Branch",
-						Value:  gh.MasterBranch,
 						Inline: true,
 					},
 					{
