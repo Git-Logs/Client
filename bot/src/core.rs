@@ -91,7 +91,7 @@ pub async fn list(
                 for webhook in webhooks {
                     // Get repos of webhook
                     let repos = sqlx::query!(
-                        "SELECT id, repo_name, channel_id FROM repos WHERE webhook_id = $1",
+                        "SELECT id, repo_name, channel_id, events FROM repos WHERE webhook_id = $1",
                         webhook.id
                     )
                     .fetch_all(&data.pool)
@@ -100,11 +100,18 @@ pub async fn list(
                     let mut repo_str = String::new();
 
                     for repo in repos {
+                        let mut event_whitelist = repo.events.join(", ");
+
+                        if event_whitelist.is_empty() {
+                            event_whitelist = "All events allowed".to_string();
+                        }    
+
                         repo_str.push_str(&format!(
-                            "__**{repo_name}**__\n\n*Channel ID:* {channel_id}\n*Repo ID:* {id}\n*Repo Name:* {repo_name}\n\n",
+                            "__**{repo_name}**__\n\n*Channel ID:* {channel_id}\n*Repo ID:* {id}\n*Repo Name:* {repo_name}\n*Events Whitelist:* {event_whitelist}\n\n",
                             repo_name = repo.repo_name,
                             channel_id = repo.channel_id,
-                            id = repo.id
+                            id = repo.id,
+                            event_whitelist = event_whitelist
                         ));
                     }
 
