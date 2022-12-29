@@ -55,6 +55,12 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 		commitList = "No commits?"
 	}
 
+	branchInfo := "**Ref:** " + gh.Ref
+
+	if gh.BaseRef != "" {
+		branchInfo = "\n" + "**Base Ref:** " + gh.BaseRef
+	}
+
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
@@ -68,7 +74,7 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "Branch",
-						Value: "**Ref:** " + gh.Ref + "\n" + "**Base Ref:** " + gh.BaseRef,
+						Value: branchInfo,
 					},
 					{
 						Name:  "Commits",
