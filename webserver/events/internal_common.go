@@ -19,6 +19,7 @@ var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, erro
 	"status":                      statusFn,
 	"release":                     releaseFn,
 	"commit_comment":              commitCommentFn,
+	"deployment":                  deploymentFn,
 }
 
 type User struct {
@@ -28,6 +29,13 @@ type User struct {
 	URL              string `json:"url"`
 	HTMLURL          string `json:"html_url"`
 	OrganizationsURL string `json:"organizations_url"`
+}
+
+func (u User) AuthorEmbed() *discordgo.MessageEmbedAuthor {
+	return &discordgo.MessageEmbedAuthor{
+		Name:    u.Login,
+		IconURL: u.AvatarURL,
+	}
 }
 
 type Repository struct {

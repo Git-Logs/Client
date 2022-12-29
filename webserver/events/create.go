@@ -28,13 +28,10 @@ func createFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: 0x00ff1a,
-				URL:   gh.Repo.HTMLURL,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
-				Title: "New " + gh.RefType + " created on " + gh.Repo.FullName,
+				Color:  0x00ff1a,
+				URL:    gh.Repo.HTMLURL,
+				Author: gh.Sender.AuthorEmbed(),
+				Title:  "New " + gh.RefType + " created on " + gh.Repo.FullName,
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",

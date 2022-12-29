@@ -42,13 +42,10 @@ func pullRequestFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: color,
-				URL:   gh.PullRequest.HTMLURL,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
-				Title: fmt.Sprintf("Pull Request %s on %s (#%d)", gh.Action, gh.Repo.FullName, gh.PullRequest.Number),
+				Color:  color,
+				URL:    gh.PullRequest.HTMLURL,
+				Author: gh.Sender.AuthorEmbed(),
+				Title:  fmt.Sprintf("Pull Request %s on %s (#%d)", gh.Action, gh.Repo.FullName, gh.PullRequest.Number),
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "Action",

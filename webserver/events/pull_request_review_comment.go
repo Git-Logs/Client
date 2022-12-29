@@ -58,12 +58,9 @@ func pullRequestReviewCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: color,
-				URL:   gh.PullRequest.HTMLURL,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
+				Color:       color,
+				URL:         gh.PullRequest.HTMLURL,
+				Author:      gh.Sender.AuthorEmbed(),
 				Description: comment,
 				Title:       "Pull Request Review Comment on " + gh.Repo.FullName + " (#" + strconv.Itoa(gh.PullRequest.Number) + ")",
 				Fields: []*discordgo.MessageEmbedField{

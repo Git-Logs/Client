@@ -49,12 +49,9 @@ func statusFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: 0x00ff1a,
-				URL:   gh.Repo.HTMLURL,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
+				Color:       0x00ff1a,
+				URL:         gh.Repo.HTMLURL,
+				Author:      gh.Sender.AuthorEmbed(),
 				Title:       "Status " + gh.State + " on " + gh.Repo.FullName,
 				Description: gh.Description + moreInfoMsg,
 				Fields: []*discordgo.MessageEmbedField{

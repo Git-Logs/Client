@@ -47,13 +47,10 @@ func releaseFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: color,
-				URL:   gh.Repo.URL,
-				Title: title,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
+				Color:       color,
+				URL:         gh.Repo.URL,
+				Title:       title,
+				Author:      gh.Sender.AuthorEmbed(),
 				Description: body,
 				Fields: []*discordgo.MessageEmbedField{
 					{

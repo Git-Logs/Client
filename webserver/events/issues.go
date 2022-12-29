@@ -42,12 +42,9 @@ func issuesFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: color,
-				URL:   gh.Issue.HTMLURL,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
+				Color:       color,
+				URL:         gh.Issue.HTMLURL,
+				Author:      gh.Sender.AuthorEmbed(),
 				Description: body,
 				Title:       fmt.Sprintf("Issue %s on %s (#%d)", gh.Action, gh.Repo.FullName, gh.Issue.Number),
 				Fields: []*discordgo.MessageEmbedField{

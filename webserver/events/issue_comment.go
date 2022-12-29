@@ -57,13 +57,10 @@ func issueCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
-				Color: color,
-				URL:   gh.Issue.HTMLURL,
-				Author: &discordgo.MessageEmbedAuthor{
-					Name:    gh.Sender.Login,
-					IconURL: gh.Sender.AvatarURL,
-				},
-				Title: fmt.Sprintf("Comment on %s (#%d) %s", gh.Repo.FullName, gh.Issue.Number, gh.Action),
+				Color:  color,
+				URL:    gh.Issue.HTMLURL,
+				Author: gh.Sender.AuthorEmbed(),
+				Title:  fmt.Sprintf("Comment on %s (#%d) %s", gh.Repo.FullName, gh.Issue.Number, gh.Action),
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "User",

@@ -17,6 +17,7 @@ Rewrite of the original Github webhook logger (Git Logs).
 - `status`
 - `release`
 - `commit_comment`
+- `deployment`
 
 **More coming soon**
 
