@@ -32,6 +32,7 @@ var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, erro
 	"workflow_run":                workflowRunFn,
 	"dependabot_alert":            dependabotAlertFn,
 	"delete":                      deleteFn,
+	"workflow_job":                workflowJobFn,
 }
 
 type User struct {
