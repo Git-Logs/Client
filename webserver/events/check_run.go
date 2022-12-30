@@ -45,7 +45,7 @@ func checkRunFn(bytes []byte) (discordgo.MessageSend, error) {
 				Color:     colorGreen,
 				URL:       gh.Repo.HTMLURL,
 				Author:    gh.Sender.AuthorEmbed(),
-				Title:     "Check Run " + gh.CheckRun.Name + ": " + gh.Action + " on " + gh.Repo.FullName,
+				Title:     "Check Run " + gh.CheckRun.Name + " " + gh.Action + " on " + gh.Repo.FullName,
 				Timestamp: gh.CheckRun.StartedAt.Format(time.RFC3339),
 				Fields: []*discordgo.MessageEmbedField{
 					{
