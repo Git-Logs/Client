@@ -49,7 +49,7 @@ func commitCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 				Color:       color,
 				URL:         gh.Comment.HTMLURL,
 				Author:      gh.Sender.AuthorEmbed(),
-				Title:       "Comment on comment " + gh.Repo.FullName + " (" + gh.Comment.CommitID[:7] + ")",
+				Title:       "Comment on commit " + gh.Repo.FullName + " (" + gh.Comment.CommitID[:7] + ")",
 				Description: comment,
 				Fields: []*discordgo.MessageEmbedField{
 					{

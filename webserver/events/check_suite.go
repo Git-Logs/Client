@@ -46,6 +46,14 @@ func checkSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
 		return discordgo.MessageSend{}, err
 	}
 
+	if gh.CheckSuite.Conclusion == "" {
+		gh.CheckSuite.Conclusion = "No conclusion yet!"
+	}
+
+	if gh.CheckSuite.Status == "" {
+		gh.CheckSuite.Status = "No status yet!"
+	}
+
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
@@ -73,6 +81,10 @@ func checkSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
 						Name:   "URL",
 						Value:  gh.CheckSuite.URL,
 						Inline: true,
+					},
+					{
+						Name:  "Commit",
+						Value: gh.CheckSuite.HeadCommit.Message + " | " + gh.Repo.Commit(gh.CheckSuite.HeadCommit.ID),
 					},
 				},
 			},

@@ -25,6 +25,7 @@ See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-eve
 - `dependabot_alert`
 - `delete`
 - `workflow_job`
+- `check_run`
 
 **More coming soon**
 
