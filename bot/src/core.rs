@@ -42,6 +42,10 @@ EX: ``delrepoevents ID``
 - **setrepochannel:** setrepochannel <repo id> <channel_id>
 
 EX: ``setrepochannel ID #github``
+
+- **resetsecret** <webhook id>
+
+EX: **resetsecret** ID
         "
     ).await?;
 
@@ -166,6 +170,17 @@ pub async fn newhook(
 
     let webh_secret = Alphanumeric.sample_string(&mut rand::thread_rng(), 256);
 
+    // Create a new dm channel with the user if not slash command
+    let dm_channel = ctx.author().create_dm_channel(&ctx).await;
+
+    let dm = match dm_channel {
+        Ok(dm) => dm,
+        Err(_) => {
+            ctx.say("I couldn't create a DM channel with you, please enable DMs from server members").await?;
+            return Ok(());
+        }
+    };
+
     sqlx::query!(
         "INSERT INTO webhooks (id, guild_id, comment, secret) VALUES ($1, $2, $3, $4)",
         id,
@@ -177,17 +192,6 @@ pub async fn newhook(
     .await?;
 
     ctx.say("Webhook created! Trying to DM you the credentials...").await?;
-
-    // Create a new dm channel with the user if not slash command
-    let dm_channel = ctx.author().create_dm_channel(&ctx).await;
-
-    let dm = match dm_channel {
-        Ok(dm) => dm,
-        Err(_) => {
-            ctx.say("I couldn't create a DM channel with you, please enable DMs from server members").await?;
-            return Ok(());
-        }
-    };
 
     dm.id.send_message(
         &ctx,
@@ -467,5 +471,83 @@ pub async fn setrepochannel(
 
     ctx.say("Channel updated!").await?;
 
+    Ok(())
+}
+
+/// Resets a webhook secret. DMs must be open
+#[poise::command(slash_command, prefix_command, guild_only, guild_cooldown = 60, required_permissions = "MANAGE_GUILD")]
+pub async fn resetsecret(
+    ctx: Context<'_>,
+    #[description = "The webhook ID"] id: String,
+) -> Result<(), Error> {
+    let data = ctx.data();
+
+    // Check if the guild exists on our DB
+    let guild = sqlx::query!(
+        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        ctx.guild_id().unwrap().to_string()
+    )
+    .fetch_one(&data.pool)
+    .await?;
+    
+    if guild.count.unwrap_or_default() == 0 {
+        // If it doesn't, return a error
+        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+    }
+
+    // Check if the webhook exists
+    let webhook = sqlx::query!(
+        "SELECT COUNT(1) FROM webhooks WHERE id = $1 AND guild_id = $2",
+        id,
+        ctx.guild_id().unwrap().to_string()
+    )
+    .fetch_one(&data.pool)
+    .await?;
+
+    if webhook.count.unwrap_or_default() == 0 {
+        return Err("That webhook doesn't exist! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+    }
+
+    let webh_secret = Alphanumeric.sample_string(&mut rand::thread_rng(), 256);
+
+    // Try to DM the user
+    // Create a new dm channel with the user if not slash command
+    let dm_channel = ctx.author().create_dm_channel(&ctx).await;
+
+    let dm = match dm_channel {
+        Ok(dm) => dm,
+        Err(_) => {
+            ctx.say("I couldn't create a DM channel with you, please enable DMs from server members").await?;
+            return Ok(());
+        }
+    };
+
+    sqlx::query!(
+        "UPDATE webhooks SET secret = $1 WHERE id = $2 AND guild_id = $3",
+        webh_secret,
+        id,
+        ctx.guild_id().unwrap().to_string()
+    )
+    .execute(&data.pool)
+    .await?;
+
+    dm.id.send_message(
+        &ctx,
+        CreateMessage::new()
+        .content(
+            format!(
+                "Your new webhook secret is `{webh_secret}`. 
+
+Update this webhooks information in GitHub settings now. Your webhook will not accept messages from GitHub unless you do so!
+
+**Delete this message after you're done!**
+                ",
+                webh_secret=webh_secret
+            )    
+        )
+    ).await?;
+
+    ctx.say("Webhook secret updated! Check your DMs for the webhook information.").await?;
+    
     Ok(())
 }
