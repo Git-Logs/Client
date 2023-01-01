@@ -100,7 +100,7 @@ pub async fn list(
                         CreateEmbed::new()
                         .title(format!("Webhook \"{}\"", webhook.comment))
                         .field("Webhook ID", &webhook_id, false)
-                        .field("URL", web_url.to_owned()+"/hookinfo/"+&webhook_id, false)
+                        .field("URL", web_url.to_owned()+"/hookinfo?id="+&webhook_id, false)
                         .field("Created at", webhook.created_at.to_string(), false)
                     );
                 };
