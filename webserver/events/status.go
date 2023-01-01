@@ -39,7 +39,7 @@ func statusFn(bytes []byte) (discordgo.MessageSend, error) {
 
 	var moreInfoMsg string
 	if gh.TargetURL != "" {
-		moreInfoMsg = "\n\nFor more information, [click here](" + gh.TargetURL + ")."
+		moreInfoMsg = "\n\nFor more information, " + gh.TargetURL
 	}
 
 	if gh.Context == "" {

@@ -1,8 +1,6 @@
 package events
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 
 	"strconv"
@@ -91,7 +89,7 @@ func workflowJobFn(bytes []byte) (discordgo.MessageSend, error) {
 		},
 		{
 			Name:   "URL",
-			Value:  fmt.Sprintf("[click here](%s)", gh.WorkflowJob.HTMLURL),
+			Value:  gh.WorkflowJob.HTMLURL,
 			Inline: true,
 		},
 	}

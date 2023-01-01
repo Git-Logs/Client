@@ -53,20 +53,14 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 
 	if gh.DeploymentStatus.EnvironmentURL == "" {
 		gh.DeploymentStatus.EnvironmentURL = "No URL available"
-	} else {
-		gh.DeploymentStatus.EnvironmentURL = "[Click here](" + gh.DeploymentStatus.EnvironmentURL + ")"
 	}
 
 	if gh.DeploymentStatus.LogURL == "" {
 		gh.DeploymentStatus.LogURL = "No URL available"
-	} else {
-		gh.DeploymentStatus.LogURL = "[Click here](" + gh.DeploymentStatus.LogURL + ")"
 	}
 
 	if gh.DeploymentStatus.TargetURL == "" {
 		gh.DeploymentStatus.TargetURL = "No URL available"
-	} else {
-		gh.DeploymentStatus.TargetURL = "[Click here](" + gh.DeploymentStatus.TargetURL + ")"
 	}
 
 	return discordgo.MessageSend{

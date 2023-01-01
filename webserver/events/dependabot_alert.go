@@ -146,7 +146,7 @@ func dependabotAlertFn(bytes []byte) (discordgo.MessageSend, error) {
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "URL",
-						Value:  "[Click here]" + "(" + gh.Alert.HTMLURL + ")",
+						Value:  gh.Alert.HTMLURL,
 						Inline: true,
 					},
 					{

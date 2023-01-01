@@ -85,7 +85,7 @@ func workflowRunFn(bytes []byte) (discordgo.MessageSend, error) {
 					},
 					{
 						Name:   "URL",
-						Value:  fmt.Sprintf("[click here](%s)", gh.WorkflowRun.URL),
+						Value:  gh.WorkflowRun.URL,
 						Inline: true,
 					},
 					{
