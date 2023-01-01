@@ -35,8 +35,64 @@ type RepoWrapper struct {
 
 func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
+		// Find the webhook in the database
+		var comment string
+
+		id := r.URL.Query().Get("id")
+
+		if id == "" {
+			w.WriteHeader(400)
+			w.Write([]byte("This request is missing the id parameter"))
+			return
+		}
+
+		err := pool.QueryRow(ctx, "SELECT comment FROM webhooks WHERE id = $1", id).Scan(&comment)
+
+		if err != nil {
+			w.WriteHeader(404)
+			w.Write([]byte("This request has an invalid id parameter"))
+			return
+		}
+
+		var respStr = strings.Builder{}
+
+		respStr.WriteString("Comment: " + comment + "\n\n")
+
+		repos, err := pool.Query(ctx, "SELECT id, repo_name, events, channel_id, created_at FROM repos WHERE webhook_id = $1", id)
+
+		if err == nil {
+			respStr.WriteString("This webhook is for the following repos:\n\n")
+
+			for repos.Next() {
+				var repoID string
+				var repoName string
+				var events []string
+				var channelID string
+				var createdAt time.Time
+
+				err = repos.Scan(&repoID, &repoName, &events, &channelID, &createdAt)
+
+				if err != nil {
+					respStr.WriteString("Error: " + err.Error() + " in fetching a repo \n")
+					continue
+				}
+
+				respStr.WriteString("Repo: " + repoName + "\n")
+				respStr.WriteString("Repo ID: " + repoID + "\n")
+				if len(events) > 0 {
+					respStr.WriteString("Allowed Events: " + strings.Join(events, ", ") + "\n")
+				} else {
+					respStr.WriteString("This repository does not have a repo whitelist. All events will be responded to!\n")
+				}
+				respStr.WriteString("Channel ID: " + channelID + "\n")
+				respStr.WriteString("Created At: " + createdAt.Format(time.RFC3339) + "\n\n")
+			}
+		} else {
+			respStr.WriteString("This webhook doesn't seem to have any added repositories yet!\n")
+		}
+
 		w.WriteHeader(200)
-		w.Write([]byte("This is the webhook route. You need to put this in Github as per the instructions in your DM"))
+		w.Write([]byte(respStr.String()))
 		return
 	}
 
