@@ -78,7 +78,7 @@ pub async fn list(
     } else {
         // Get all webhooks
         let webhooks = sqlx::query!(
-            "SELECT id, guild_id, comment, created_at FROM webhooks WHERE guild_id = $1",
+            "SELECT id, comment, created_at FROM webhooks WHERE guild_id = $1",
             ctx.guild_id().unwrap().to_string()
         )
         .fetch_all(&data.pool)
@@ -88,39 +88,16 @@ pub async fn list(
             Ok(webhooks) => {
                 let mut embeds = Vec::new();
 
+                let web_url = &std::env::var("RESPOND_URL").unwrap();
+                    
                 for webhook in webhooks {
-                    // Get repos of webhook
-                    let repos = sqlx::query!(
-                        "SELECT id, repo_name, channel_id, events FROM repos WHERE webhook_id = $1 ORDER BY created_at DESC",
-                        webhook.id
-                    )
-                    .fetch_all(&data.pool)
-                    .await?;
-
-                    let mut repo_str = String::new();
-
-                    for repo in repos {
-                        let mut event_whitelist = repo.events.join(", ");
-
-                        if event_whitelist.is_empty() {
-                            event_whitelist = "All events allowed".to_string();
-                        }    
-
-                        repo_str.push_str(&format!(
-                            "__**{repo_name}**__\n\n*Channel ID:* {channel_id}\n*Repo ID:* {id}\n*Repo Name:* {repo_name}\n*Events Whitelist:* {event_whitelist}\n\n",
-                            repo_name = repo.repo_name,
-                            channel_id = repo.channel_id,
-                            id = repo.id,
-                            event_whitelist = event_whitelist
-                        ));
-                    }
-
+                    let webhook_id = webhook.id;
                     embeds.push(
                         CreateEmbed::new()
                         .title(format!("Webhook \"{}\"", webhook.comment))
-                        .field("ID", webhook.id, false)
+                        .field("Webhook ID", &webhook_id, false)
+                        .field("URL", web_url.to_owned()+"/api/hook/"+&webhook_id, false)
                         .field("Created at", webhook.created_at.to_string(), false)
-                        .field("Repos", repo_str, false)
                     );
                 };
 
@@ -187,7 +164,7 @@ pub async fn newhook(
     // Create the webhook
     let id = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
 
-    let webh_secret = Alphanumeric.sample_string(&mut rand::thread_rng(), 128);
+    let webh_secret = Alphanumeric.sample_string(&mut rand::thread_rng(), 256);
 
     sqlx::query!(
         "INSERT INTO webhooks (id, guild_id, comment, secret) VALUES ($1, $2, $3, $4)",
