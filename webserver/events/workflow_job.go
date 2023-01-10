@@ -36,7 +36,7 @@ type WorkflowJobEvent struct {
 		} `json:"steps"`
 		CheckRunUrl     string   `json:"check_run_url"`
 		Labels          []string `json:"labels"`
-		RunnerID        string   `json:"runner_id"`
+		RunnerID        int      `json:"runner_id"`
 		RunnerName      string   `json:"runner_name"`
 		RunnerGroupID   int      `json:"runner_group_id"`
 		RunnerGroupName string   `json:"runner_group_name"`
