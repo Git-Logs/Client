@@ -22,13 +22,8 @@ func watchFn(bytes []byte) (discordgo.MessageSend, error) {
 
 	var color int
 	var title string
-	if gh.Action == "created" {
-		color = colorGreen
-		title = "Watching: " + gh.Repo.FullName
-	} else {
-		color = colorRed
-		title = "No longer watching: " + gh.Repo.FullName
-	}
+	color = colorGreen
+	title = "Watch " + gh.Action + ": " + gh.Repo.FullName
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
