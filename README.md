@@ -27,6 +27,7 @@ See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-eve
 - `workflow_job`
 - `check_run`
 - `public`
+- `watch`
 
 **More coming soon**
 
