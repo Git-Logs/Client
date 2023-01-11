@@ -78,7 +78,7 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 						Inline: true,
 					},
 					{
-						Name:   "Is Production",
+						Name:   "Is Production (according to github)",
 						Value:  fmt.Sprintf("%t", gh.Deployment.ProductionEnvironment),
 						Inline: true,
 					},
