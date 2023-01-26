@@ -160,13 +160,17 @@ func branchProtectionRuleFn(bytes []byte) (discordgo.MessageSend, error) {
 		title = "Branch protection rule deleted: " + gh.Repo.FullName
 	}
 
+	desc := "**Settings:**\n\n" + gh.Rule.settings()
+
 	changes := []string{}
 
 	for k := range gh.Changes {
 		changes = append(changes, k)
 	}
 
-	desc := "**Settings:**\n\n" + gh.Rule.settings() + "\n\n**Changes:**\n\n" + strings.Join(changes, ", ")
+	if len(changes) > 0 {
+		desc += "\n\n**Changes:**\n\n" + strings.Join(changes, ", ")
+	}
 
 	return discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
