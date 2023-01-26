@@ -1,6 +1,7 @@
 package events
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,11 +12,13 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var (
 	colorGreen   = 0x00ff1a
+	colorYellow  = 0xffff00
 	colorRed     = 0xff0000
 	colorDarkRed = 0x8b0000
 )
 
 var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, error){
+	"branch_protection_rule":      branchProtectionRuleFn,
 	"check_suite":                 checkSuiteFn,
 	"create":                      createFn,
 	"issues":                      issuesFn,
@@ -112,4 +115,18 @@ type PullRequest struct {
 	User    User              `json:"user"`
 	Base    PullRequestCommit `json:"base"`
 	Head    PullRequestCommit `json:"head"`
+}
+
+// Auxillary but useful for large lists of data
+type KeyValue struct {
+	Key   string
+	Value any
+}
+
+func (k KeyValue) String() string {
+	return k.Key + " => " + fmt.Sprint(k.Value)
+}
+
+func (k KeyValue) StringMD() string {
+	return "**" + k.Key + "**" + " => " + fmt.Sprint(k.Value)
 }

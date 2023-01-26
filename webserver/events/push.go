@@ -69,7 +69,7 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:  colorGreen,
-				URL:    gh.Repo.URL,
+				URL:    gh.Repo.HTMLURL,
 				Author: gh.Sender.AuthorEmbed(),
 				Title:  "Push on " + gh.Repo.FullName,
 				Fields: []*discordgo.MessageEmbedField{
