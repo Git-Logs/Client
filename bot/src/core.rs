@@ -45,7 +45,11 @@ EX: ``setrepochannel ID #github``
 
 - **resetsecret** <webhook id>
 
-EX: **resetsecret** ID
+EX: ``resetsecret ID``
+
+- **backuprepos** <webhook id>
+
+EX: ``backuprepos ID``
         "
     ).await?;
 
@@ -438,7 +442,7 @@ pub async fn delrepoevents(
     Ok(())
 }
 
-/// Sets a event whitelist for a repository
+/// Updates the channel for a repository
 #[poise::command(slash_command, prefix_command, guild_only, guild_cooldown = 60, required_permissions = "MANAGE_GUILD")]
 pub async fn setrepochannel(
     ctx: Context<'_>,

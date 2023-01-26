@@ -10,6 +10,7 @@ use serenity::gateway::ActivityData;
 
 mod help;
 mod core;
+mod backups;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
