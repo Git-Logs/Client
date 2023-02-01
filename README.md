@@ -29,6 +29,7 @@ See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-eve
 - `public`
 - `watch`
 - `branch_protection_rule`
+- `repository`
 
 **More coming soon**
 
