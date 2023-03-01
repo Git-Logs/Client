@@ -55,6 +55,10 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 		commitList += fmt.Sprintf("%s [``%s``](%s) | [%s](%s)\n", commit.Message, commit.ID[:7], commit.URL, commit.Author.Username, strings.ReplaceAll("https://github.com/"+commit.Author.Username, " ", "%20"))
 	}
 
+	if len(commitList) > 1024 {
+		commitList = commitList[:1024] + "..."
+	}
+
 	if commitList == "" {
 		commitList = "No commits?"
 	}
