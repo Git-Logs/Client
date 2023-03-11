@@ -240,17 +240,17 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			errors += err.Error()
+
+			gotError := err.Error()
+
+			if len(gotError) > 1020 {
+				gotError = gotError[:1020] + "..."
+			}
+
+			discord.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
+				Content: "Could not send event " + header + " to channel: <#" + channelId + ">:" + gotError,
+			})
 		}
-
-		gotError := err.Error()
-
-		if len(gotError) > 1020 {
-			gotError = gotError[:1020] + "..."
-		}
-
-		discord.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
-			Content: "Could not send event " + header + " to channel: <#" + channelId + ">:" + gotError,
-		})
 	}
 
 	w.Write([]byte("OK: " + repoName + "\n" + errors))

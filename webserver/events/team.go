@@ -81,7 +81,7 @@ func teamFn(bytes []byte) (discordgo.MessageSend, error) {
 				Color:  color,
 				URL:    gh.Repo.HTMLURL,
 				Author: gh.Sender.AuthorEmbed(),
-				Title:  "Team" + gh.Team.Name + strings.Replace(gh.Action, "_", " ", -1),
+				Title:  "Team " + strings.Replace(gh.Action, "_", " ", -1),
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:  "Team",
