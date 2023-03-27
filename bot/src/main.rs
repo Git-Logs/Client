@@ -1,9 +1,8 @@
 use std::{time::Duration};
 
-use dotenv::dotenv;
 use log::{error, info};
 use poise::serenity_prelude::{
-    self as prelude, FullEvent, UserId,
+    self as prelude, FullEvent,
 };
 use sqlx::postgres::PgPoolOptions;
 use serenity::gateway::ActivityData;
@@ -11,6 +10,7 @@ use serenity::gateway::ActivityData;
 mod help;
 mod core;
 mod backups;
+mod config;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -100,16 +100,16 @@ async fn event_listener(event: &FullEvent, _user_data: &Data) -> Result<(), Erro
 async fn main() {
     const MAX_CONNECTIONS: u32 = 3; // max connections to the database, we don't need too many here
 
-    dotenv().ok();
+    std::env::set_var("RUST_LOG", "bot=info");
 
     env_logger::init();
 
     let mut http =
-        prelude::HttpBuilder::new(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"));
+        prelude::HttpBuilder::new(&config::CONFIG.token);
 
-    if let Ok(v) = std::env::var("PROXY_URL") {
+    if let Some(v) = &config::CONFIG.proxy_url {
         info!("Setting proxy url to {}", v);
-        http = http.proxy(&v).ratelimiter_disabled(true);
+        http = http.proxy(v).ratelimiter_disabled(true);
     }    
 
     let http = http.build();
@@ -120,19 +120,9 @@ async fn main() {
             prelude::GatewayIntents::MESSAGE_CONTENT | prelude::GatewayIntents::GUILD_MESSAGES | prelude::GatewayIntents::GUILDS
         );
 
-    let owners = std::env::var("OWNERS")
-        .expect("missing OWNERS")
-        .split(',')
-        .map(|x| x.parse::<UserId>().expect("invalid owner"))
-        .collect::<Vec<_>>();
-
-    // Convert to hashset of HashSet<UserId>
-    let owners = owners.into_iter().collect::<std::collections::HashSet<_>>();
-
     let framework = poise::Framework::new(
         poise::FrameworkOptions {
-            owners,
-            initialize_owners: false,
+            initialize_owners: true,
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("git!".into()),
                 ..poise::PrefixFrameworkOptions::default()

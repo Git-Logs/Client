@@ -2,7 +2,7 @@ use log::error;
 use poise::{serenity_prelude::{CreateMessage, ChannelId, CreateEmbed}, CreateReply};
 use rand::{distributions::{Alphanumeric, DistString}};
 
-use crate::{Context, Error};
+use crate::{Context, Error, config};
 
 /// Command reference
 #[poise::command(slash_command, prefix_command, guild_only)]
@@ -93,8 +93,6 @@ pub async fn list(
         match webhooks {
             Ok(webhooks) => {
                 let mut embeds = Vec::new();
-
-                let web_url = &std::env::var("RESPOND_URL").unwrap();
                     
                 for webhook in webhooks {
                     let webhook_id = webhook.id;
@@ -102,7 +100,7 @@ pub async fn list(
                         CreateEmbed::new()
                         .title(format!("Webhook \"{}\"", webhook.comment))
                         .field("Webhook ID", &webhook_id, false)
-                        .field("Hook URL (visit for hook info, add to Github to recieve events)", web_url.to_owned()+"/kittycat?id="+&webhook_id, false)
+                        .field("Hook URL (visit for hook info, add to Github to recieve events)", config::CONFIG.api_url.clone()+"/kittycat?id="+&webhook_id, false)
                         .field("Created at", webhook.created_at.to_string(), false)
                     );
                 };
@@ -197,7 +195,7 @@ pub async fn newhook(
         .content(
             format!(
                 "
-Next, add the following webhook to your Github repositories (or organizations): `{respond_url}/kittycat?id={id}`
+Next, add the following webhook to your Github repositories (or organizations): `{api_url}/kittycat?id={id}`
 
 Set the `Secret` field to `{webh_secret}` and ensure that Content Type is set to `application/json`. 
 
@@ -207,7 +205,7 @@ When creating repositories, use `{id}` as the ID.
 
 **Delete this message after you're done!**
                 ",
-                respond_url=std::env::var("RESPOND_URL").unwrap(),
+                api_url=config::CONFIG.api_url,
                 id=id,
                 webh_secret=webh_secret
             )    

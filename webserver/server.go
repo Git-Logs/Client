@@ -11,14 +11,17 @@ import (
 	"os"
 	"strings"
 	"time"
+	"webserver/config"
 	"webserver/events"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
+	"github.com/infinitybotlist/genconfig"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 	jsoniter "github.com/json-iterator/go"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -26,6 +29,7 @@ var (
 	discord *discordgo.Session
 	pool    *pgxpool.Pool
 	ctx     = context.Background()
+	v       = validator.New()
 )
 
 type RepoWrapper struct {
@@ -257,16 +261,35 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	godotenv.Load()
+	genconfig.SampleFileName = "api-config.yaml.sample"
 
-	var err error
-	pool, err = pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	genconfig.GenConfig(config.Config{})
+
+	cfg, err := os.ReadFile("api-config.yaml")
 
 	if err != nil {
 		panic(err)
 	}
 
-	discord, err = discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
+	err = yaml.Unmarshal(cfg, &config.Global)
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = v.Struct(config.Global)
+
+	if err != nil {
+		panic("configError: " + err.Error())
+	}
+
+	pool, err = pgxpool.New(ctx, config.Global.PostgresURL)
+
+	if err != nil {
+		panic(err)
+	}
+
+	discord, err = discordgo.New("Bot " + config.Global.Token)
 
 	discord.Identify.Intents = discordgo.IntentsGuilds
 
@@ -287,5 +310,5 @@ func main() {
 	// Webhook route
 	r.HandleFunc("/kittycat", webhookRoute)
 
-	http.ListenAndServe(":"+os.Getenv("PORT"), r)
+	http.ListenAndServe(config.Global.Port, r)
 }
