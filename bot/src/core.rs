@@ -81,8 +81,6 @@ pub async fn list(
         .await?;
 
         ctx.say("This guild doesn't have any webhooks yet. Get started with ``/newhook`` (or ``git!newhook``)").await?;
-
-        return Ok(());
     } else {
         // Get all webhooks
         let webhooks = sqlx::query!(
@@ -115,19 +113,15 @@ pub async fn list(
                 cr.embeds = embeds;
 
                 ctx.send(cr).await?;
-
-                return Ok(());
             },
             Err(e) => {
                 error!("Error fetching webhooks: {:?}", e);
                 ctx.say("This guild doesn't have any webhooks yet. Get started with ``/newhook`` (or ``git!newhook``)").await?;
-
-                return Ok(());
             }
         }
     }
 
-
+    Ok(())
 }
 
 /// Creates a new webhook in a guild for sending Github notifications
@@ -260,7 +254,7 @@ pub async fn newrepo(
     let count = webhook_count.count.unwrap_or_default();
 
     if count == 0 {
-        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+        Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into())
     } else {
         // Check if the webhook exists
         let webhook = sqlx::query!(
@@ -275,10 +269,12 @@ pub async fn newrepo(
             return Err("That webhook doesn't exist! Use ``/newhook`` (or ``git!newhook``) to create one".into());
         }
 
+        let repo_name = (owner+"/"+&name).to_lowercase();
+
         // Check if the repo exists
         let repo = sqlx::query!(
-            "SELECT COUNT(1) FROM repos WHERE id = $1 AND webhook_id = $2",
-            name,
+            "SELECT COUNT(1) FROM repos WHERE lower(repo_name) = $1 AND webhook_id = $2",
+            &repo_name,
             webhook_id
         )
         .fetch_one(&data.pool)
@@ -292,7 +288,7 @@ pub async fn newrepo(
                 "INSERT INTO repos (id, webhook_id, repo_name, channel_id, guild_id) VALUES ($1, $2, $3, $4, $5)",
                 id,
                 webhook_id,
-                (owner+"/"+&name).to_lowercase(),
+                &repo_name,
                 channel.to_string(),
                 ctx.guild_id().unwrap().to_string()
             )
@@ -305,7 +301,7 @@ pub async fn newrepo(
 
             Ok(())
         } else {
-            return Err("That repo already exists! Use ``/delrepo`` (or ``git!delrepo``) to delete it".into());
+            Err("That repo already exists! Use ``/delrepo`` (or ``git!delrepo``) to delete it".into())
         }
     }
 }
@@ -387,11 +383,11 @@ pub async fn setrepoevents(
         return Err("That repo doesn't exist! Use ``/newrepo`` (or ``git!newrepo``) to create one".into());
     }
 
-    if events.contains(",") {
+    if events.contains(',') {
         return Err("Events are space seperated, not comma seperated!".into());
     }
 
-    let events_vec = events.split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+    let events_vec = events.split(' ').map(|s| s.to_string()).collect::<Vec<String>>();
 
     sqlx::query!(
         "UPDATE repos SET events = $1 WHERE id = $2 AND guild_id = $3",

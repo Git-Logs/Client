@@ -152,7 +152,8 @@ async fn main() {
                 core::delrepoevents(),
                 core::setrepochannel(),
                 core::resetsecret(),
-                backups::backuprepos()
+                backups::backup(),
+                backups::restore()
             ],
             /// This code is run before every command
             pre_command: |ctx| {
