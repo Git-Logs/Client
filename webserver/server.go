@@ -268,7 +268,7 @@ You may also be looking for:
 
 - API (possibly unstable): /api/
   - Counts: /counts/
-    - <server_count>,<user_count>
+    - <server_count>,<user_count>,<shard_count>
 
 - Webhooks: /kittycat?id=ID
   - Get Webhook Info: GET /kittycat?id=ID
