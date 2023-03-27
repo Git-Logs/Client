@@ -175,7 +175,7 @@ async fn main() {
                 Ok(Data {
                     pool: PgPoolOptions::new()
                         .max_connections(MAX_CONNECTIONS)
-                        .connect(&std::env::var("DATABASE_URL").expect("missing DATABASE_URL"))
+                        .connect(&config::CONFIG.database_url)
                         .await
                         .expect("Could not initialize connection"),
                 })
