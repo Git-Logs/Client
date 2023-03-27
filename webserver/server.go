@@ -260,6 +260,22 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK: " + repoName + "\n" + errors))
 }
 
+func index(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`This is the API for the Git Logs service. It handles webhooks from GitHub and sends them to Discord.
+
+You may also be looking for:
+
+- API (possibly unstable): /api/
+  - Counts: /counts/
+    - <server_count>,<user_count>
+
+- Webhooks: /kittycat?id=ID
+  - Get Webhook Info: GET /kittycat?id=ID
+  - Handle Github Webhook: POST /kittycat?id=ID
+`))
+}
+
 func main() {
 	genconfig.SampleFileName = "api-config.yaml.sample"
 
@@ -291,7 +307,7 @@ func main() {
 
 	discord, err = discordgo.New("Bot " + config.Global.Token)
 
-	discord.Identify.Intents = discordgo.IntentsGuilds
+	discord.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers
 
 	if err != nil {
 		panic(err)
@@ -309,6 +325,10 @@ func main() {
 
 	// Webhook route
 	r.HandleFunc("/kittycat", webhookRoute)
+	r.HandleFunc("/", index)
+
+	// API
+	r.HandleFunc("/api/counts", stats)
 
 	http.ListenAndServe(config.Global.Port, r)
 }

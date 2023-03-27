@@ -8,8 +8,8 @@ all:
 deploy:
 	ssh root@$(HOST) "rm -rf ~/github-v2/webserver-deploy && mkdir ~/github-v2/webserver-deploy"
 
-	# Tar all files in the current directory
-	tar -czvf webserver.tar.gz .
+	# Tar all files in the current directory ignoring the ``webserver`` file
+	tar -czvf webserver.tar.gz --exclude webserver .
 
 	# Push to the server
 	scp webserver.tar.gz root@$(HOST):~/github-v2/webserver-deploy
