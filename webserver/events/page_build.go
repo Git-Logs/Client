@@ -1,6 +1,7 @@
 package events
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -53,7 +54,7 @@ func pageBuildFn(bytes []byte) (discordgo.MessageSend, error) {
 							if gh.Build.Duration == 0 {
 								return "unknown"
 							}
-							return (time.Duration(gh.Build.Duration) * time.Second).String()
+							return fmt.Sprintf("%d seconds", gh.Build.Duration)
 						}(),
 					},
 					{
