@@ -7,6 +7,17 @@ import (
 	"webserver/events"
 )
 
+// Precomputed values
+var eventList []string
+
+func init() {
+	eventList = []string{}
+
+	for event := range events.SupportedEvents {
+		eventList = append(eventList, event)
+	}
+}
+
 func stats(w http.ResponseWriter, r *http.Request) {
 	// Get guild count
 	guildCount := len(discord.State.Guilds)
@@ -21,21 +32,15 @@ func stats(w http.ResponseWriter, r *http.Request) {
 }
 
 func eventsListView(w http.ResponseWriter, r *http.Request) {
-	eventList := []string{}
+	events := []string{}
 
-	for event := range events.SupportedEvents {
-		eventList = append(eventList, "- "+event)
+	for _, event := range eventList {
+		events = append(events, "- "+event)
 	}
 
 	w.Write([]byte(strings.Join(eventList, "\n")))
 }
 
 func eventsCommaSepView(w http.ResponseWriter, r *http.Request) {
-	eventList := []string{}
-
-	for event := range events.SupportedEvents {
-		eventList = append(eventList, event)
-	}
-
 	w.Write([]byte(strings.Join(eventList, ",")))
 }

@@ -8,7 +8,7 @@ Rewrite of the original Github webhook logger (Git Logs).
 
 See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) for a list of all events.
 
-<iframe src="https://v2.gitlogs.xyz/api/events/listview"></iframe>
+Please see [here](https://v2.gitlogs.xyz/api/events/listview) for a list of all supported events.
 
 **More coming soon**
 
