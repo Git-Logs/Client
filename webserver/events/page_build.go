@@ -45,7 +45,7 @@ func pageBuildFn(bytes []byte) (discordgo.MessageSend, error) {
 						Value: gh.Sender.Link(),
 					},
 					{
-						Name:  "Changes",
+						Name:  "Commit",
 						Value: gh.Repo.Commit(gh.Build.Commit),
 					},
 					{
