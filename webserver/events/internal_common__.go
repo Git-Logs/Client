@@ -41,6 +41,7 @@ var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, erro
 	"watch":                       watchFn,
 	"repository":                  repositoryFn,
 	"team":                        teamFn,
+	"fork":                        forkFn,
 }
 
 type User struct {
@@ -72,11 +73,19 @@ type Repository struct {
 	Owner       User   `json:"owner"`
 	HTMLURL     string `json:"html_url"`
 	CommitsURL  string `json:"commits_url"`
+	Private     bool   `json:"private"`
 }
 
 // Commit returns the commit URL for the given commit ID.
 func (r Repository) Commit(id string) string {
 	return "[" + id[:7] + "](" + r.HTMLURL + "/commit/" + id + ")"
+}
+
+func (r Repository) Visibility() string {
+	if r.Private {
+		return "Private"
+	}
+	return "Public"
 }
 
 type Issue struct {

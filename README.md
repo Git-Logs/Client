@@ -31,6 +31,7 @@ See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-eve
 - `branch_protection_rule`
 - `repository`
 - `team`
+- `fork`
 
 **More coming soon**
 
