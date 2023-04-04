@@ -8,30 +8,7 @@ Rewrite of the original Github webhook logger (Git Logs).
 
 See [here](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads) for a list of all events.
 
-- `push`
-- `star`
-- `issues`
-- `pull_request`
-- `issue_comment`
-- `pull_request_review_comment`
-- `create`
-- `check_suite`
-- `status`
-- `release`
-- `commit_comment`
-- `deployment`
-- `deployment_status`
-- `workflow_run`
-- `dependabot_alert`
-- `delete`
-- `workflow_job`
-- `check_run`
-- `public`
-- `watch`
-- `branch_protection_rule`
-- `repository`
-- `team`
-- `fork`
+<iframe src="https://v2.gitlogs.xyz/api/events/listview"></iframe>
 
 **More coming soon**
 

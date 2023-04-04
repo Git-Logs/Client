@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
+	"webserver/events"
 )
 
 func stats(w http.ResponseWriter, r *http.Request) {
@@ -16,4 +18,24 @@ func stats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(fmt.Sprintf("%d,%d,%d", guildCount, userCount, shardCount)))
+}
+
+func eventsListView(w http.ResponseWriter, r *http.Request) {
+	eventList := []string{}
+
+	for event := range events.SupportedEvents {
+		eventList = append(eventList, "- "+event)
+	}
+
+	w.Write([]byte(strings.Join(eventList, "\n")))
+}
+
+func eventsCommaSepView(w http.ResponseWriter, r *http.Request) {
+	eventList := []string{}
+
+	for event := range events.SupportedEvents {
+		eventList = append(eventList, event)
+	}
+
+	w.Write([]byte(strings.Join(eventList, ",")))
 }

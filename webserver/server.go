@@ -329,6 +329,8 @@ func main() {
 
 	// API
 	r.HandleFunc("/api/counts", stats)
+	r.HandleFunc("/api/events/listview", eventsListView)
+	r.HandleFunc("/api/events/csview", eventsCommaSepView)
 
 	http.ListenAndServe(config.Global.Port, r)
 }
