@@ -6,6 +6,8 @@ bot/bot
 bot/bot.new
 webserver/webserver
 **/.DS_Store
-**/config.yaml
-**/config.yaml.sample
+**/*config.yaml
+**/*-config.yaml
+**/*config.yaml.sample
+**/*-config.yaml.sample
 **/*.tar.gz

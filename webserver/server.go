@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 	"webserver/config"
+	_ "webserver/eventmodifiers"
 	"webserver/events"
 
 	"github.com/bwmarrin/discordgo"
