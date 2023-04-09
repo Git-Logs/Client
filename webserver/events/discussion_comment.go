@@ -46,8 +46,8 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Comment.Content = gh.Comment.Content[:3000] + "... [Read More](" + gh.Comment.Url + ")"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -83,11 +83,11 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	case "edited":
 
 		if len(gh.Comment.Content) > 3000 {
-			gh.Comment.Content = gh.Comment.Content[:3000] + "..."
+			gh.Comment.Content = gh.Comment.Content[:3000] + "... [Read More](" + gh.Comment.Url + ")"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -123,11 +123,11 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	case "deleted":
 
 		if len(gh.Comment.Content) > 3000 {
-			gh.Comment.Content = gh.Comment.Content[:3000] + "..."
+			gh.Comment.Content = gh.Comment.Content[:3000] + "... [Read More](" + gh.Comment.Url + ")"
 		}
 
 		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+			gh.Discussion.Title = gh.Discussion.Title[:200] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
 		return discordgo.MessageSend{
