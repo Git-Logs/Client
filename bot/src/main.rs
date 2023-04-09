@@ -138,8 +138,6 @@ async fn main() {
                 core::newrepo(),
                 core::delhook(),
                 core::delrepo(),
-                core::setrepoevents(),
-                core::delrepoevents(),
                 core::setrepochannel(),
                 core::resetsecret(),
                 backups::backup(),

@@ -3,11 +3,35 @@ use serde::{Serialize, Deserialize};
 
 use crate::{Context, Error};
 
+const PROTOCOL: u8 = 1;
+
 #[derive(Serialize, Deserialize)]
 struct Repo {
+    repo_id: String,
     repo_name: String,
     channel_id: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct EventModifier {
+    event_modifier_id: String,
+    repo_id: Option<String>,
     events: Vec<String>,
+    blacklisted: bool,
+    whitelisted: bool,
+    redirect_channel: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Backup {
+    protocol: u8,
+    event_modifiers: Vec<EventModifier>,
+    repos: Vec<Repo>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ProtocolCheck {
+    protocol: Option<u8>,
 }
 
 /// Backups the repositories of a webhook to a JSON file
@@ -45,7 +69,7 @@ pub async fn backup(
     }
 
     let rows = sqlx::query!(
-        "SELECT repo_name, channel_id, events FROM repos WHERE webhook_id = $1",
+        "SELECT id, repo_name, channel_id FROM repos WHERE webhook_id = $1",
         id
     )
     .fetch_all(&data.pool)
@@ -55,18 +79,43 @@ pub async fn backup(
 
     for row in rows {
         repos.push(Repo {
+            repo_id: row.id,
             repo_name: row.repo_name,
             channel_id: row.channel_id,
-            events: row.events,
         });
     }
 
-    let json = serde_json::to_string(&repos)?;
+    // Fetch the event modifiers
+    let rows = sqlx::query!(
+        "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel FROM event_modifiers WHERE webhook_id = $1",
+        id
+    )
+    .fetch_all(&data.pool)
+    .await?;
+
+    let mut event_modifiers = Vec::new();
+
+    for row in rows {
+        event_modifiers.push(EventModifier {
+            event_modifier_id: row.id,
+            repo_id: row.repo_id,
+            events: row.events,
+            blacklisted: row.blacklisted,
+            whitelisted: row.whitelisted,
+            redirect_channel: row.redirect_channel,
+        });
+    }
+
+    let json = serde_json::to_string(&Backup {
+        protocol: PROTOCOL,
+        event_modifiers,
+        repos,
+    })?;
 
     let msg = CreateReply::new()
     .content("Here's your backup file!")
     .attachment(
-        CreateAttachment::bytes(json.as_bytes(), "repos_".to_string() + &id + ".glb")
+        CreateAttachment::bytes(json.as_bytes(), id + ".glb")
     );
 
     ctx.send(msg).await?;
@@ -109,18 +158,35 @@ pub async fn restore(
         return Err("That webhook doesn't exist! Use ``/newhook`` (or ``git!newhook``) to create one".into());
     }
 
-    let backup = file.download().await?;
+    let backup_bytes = file.download().await?;
 
-    let repos: Vec<Repo> = serde_json::from_slice(&backup)?;
+    let backup_protocol: ProtocolCheck = serde_json::from_slice(&backup_bytes)?;
 
-    let mut inserted = 0;
-    let mut updated = 0;
+    if backup_protocol.protocol.unwrap_or_default() != PROTOCOL {
+        return Err(
+            format!("This backup file is not compatible with this version of the bot. 
 
-    for repo in repos {
+Protocol version expected: {},
+Protocol version found: {}                
+
+Please contact our support team.
+            ", PROTOCOL, backup_protocol.protocol.unwrap_or_default()).into()
+        );
+    }
+
+    let backup: Backup = serde_json::from_slice(&backup_bytes)?;
+
+    // Restore the repositories
+    let status = ctx.say("Restoring repositories [1/2]...").await?;
+
+    let mut inserted_repos = 0;
+    let mut updated_repos = 0;
+
+    for repo in backup.repos {
         // Check that the repo exists
         let repo_exists = sqlx::query!(
-            "SELECT COUNT(1) FROM repos WHERE lower(repo_name) = $1 AND webhook_id = $2",
-            repo.repo_name.to_lowercase(),
+            "SELECT COUNT(1) FROM repos WHERE id = $1 AND webhook_id = $2",
+            repo.repo_id,
             id
         )
         .fetch_one(&data.pool)
@@ -129,38 +195,105 @@ pub async fn restore(
         if repo_exists.count.unwrap_or_default() == 0 {
             // If it doesn't, create it
             sqlx::query!(
-                "INSERT INTO repos (repo_name, webhook_id, channel_id, events) VALUES ($1, $2, $3, $4)",
+                "INSERT INTO repos (id, repo_name, webhook_id, channel_id) VALUES ($1, $2, $3, $4)",
+                repo.repo_id,
                 repo.repo_name,
                 id,
                 repo.channel_id,
-                &repo.events
             )
             .execute(&data.pool)
             .await?;
 
-            inserted += 1;
+            inserted_repos += 1;
         } else {
             // If it does, update it
             sqlx::query!(
-                "UPDATE repos SET channel_id = $1, events = $2 WHERE lower(repo_name) = $3 AND webhook_id = $4",
+                "UPDATE repos SET repo_name = $1, channel_id = $2 WHERE id = $3 AND webhook_id = $4",
+                repo.repo_name,
                 repo.channel_id,
-                &repo.events,
-                repo.repo_name.to_lowercase(),
+                repo.repo_id,
                 id
             )
             .execute(&data.pool)
             .await?;
 
-            updated += 1;
+            updated_repos += 1;
         }
     }
 
-    ctx.say(
-        format!(r#"
+    // Restore event modifiers
+    status.edit(
+        ctx,
+        CreateReply::new()
+        .content("Restoring event modifiers [2/2]...")
+    ).await?;
+
+    let mut inserted_modifiers = 0;
+    let mut updated_modifiers = 0;
+
+    for event_modifier in backup.event_modifiers {
+        // Check that the event modifier exists
+        let event_modifier_exists = sqlx::query!(
+            "SELECT COUNT(1) FROM event_modifiers WHERE id = $1 AND webhook_id = $2",
+            event_modifier.event_modifier_id,
+            id
+        )
+        .fetch_one(&data.pool)
+        .await?;
+
+        if event_modifier_exists.count.unwrap_or_default() == 0 {
+            // If it doesn't, create it
+            sqlx::query!(
+                "INSERT INTO event_modifiers (id, repo_id, events, blacklisted, whitelisted, redirect_channel, webhook_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                event_modifier.event_modifier_id,
+                event_modifier.repo_id,
+                &event_modifier.events,
+                event_modifier.blacklisted,
+                event_modifier.whitelisted,
+                event_modifier.redirect_channel,
+                id
+            )
+            .execute(&data.pool)
+            .await?;
+
+            inserted_modifiers += 1;
+        } else {
+            // If it does, update it
+            sqlx::query!(
+                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5 WHERE id = $6 AND webhook_id = $7",
+                event_modifier.repo_id,
+                &event_modifier.events,
+                event_modifier.blacklisted,
+                event_modifier.whitelisted,
+                event_modifier.redirect_channel,
+                event_modifier.event_modifier_id,
+                id
+            )
+            .execute(&data.pool)
+            .await?;
+
+            updated_modifiers += 1;
+        }
+    }
+
+    status.edit(
+        ctx,
+        CreateReply::new()
+        .content(
+            format!(r#"
 **Summary**
 
-- **Inserted:** {}
-- **Updated:** {}"#, inserted, updated)
+- **Inserted repos:** {inserted_repos}
+- **Updated repos:** {updated_repos}
+- **Inserted event modifiers:** {inserted_modifiers}
+- **Updated event modifiers:** {updated_modifiers}
+"#, 
+                inserted_repos = inserted_repos, 
+                updated_repos = updated_repos,
+                inserted_modifiers = inserted_modifiers,
+                updated_modifiers = updated_modifiers
+            )
+        )    
     ).await?;
 
     Ok(())

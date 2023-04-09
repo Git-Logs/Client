@@ -31,10 +31,6 @@ EX: ``newrepo ID Git-Logs MyRepo #github``
 
 EX: ``delrepo ID``
 
-- **setrepoevents:** setrepoevents <repo id> <space seperated list of events>
-
-EX: ``setrepoevents ID 'push pull_request'``
-
 - **setrepochannel:** delrepoevents <repo id>
 
 EX: ``delrepoevents ID``
@@ -355,83 +351,6 @@ pub async fn delrepo(
     .await?;
 
     ctx.say("Repo deleted!").await?;
-
-    Ok(())
-}
-
-/// Sets a event whitelist for a repository
-#[poise::command(slash_command, prefix_command, guild_only, guild_cooldown = 60, required_permissions = "MANAGE_GUILD")]
-pub async fn setrepoevents(
-    ctx: Context<'_>,
-    #[description = "The repo ID"] id: String,
-    #[description = "The events to whitelist"] events: String,
-) -> Result<(), Error> { 
-    let data = ctx.data();
-
-    // Check if the repo exists
-    let repo = sqlx::query!(
-        "SELECT COUNT(1) FROM repos WHERE id = $1 AND guild_id = $2",
-        id,
-        ctx.guild_id().unwrap().to_string()
-    )
-    .fetch_one(&data.pool)
-    .await?;
-
-    if repo.count.unwrap_or_default() == 0 {
-        return Err("That repo doesn't exist! Use ``/newrepo`` (or ``git!newrepo``) to create one".into());
-    }
-
-    if events.contains(',') {
-        return Err("Events are space seperated, not comma seperated!".into());
-    }
-
-    let events_vec = events.split(' ').map(|s| s.to_string()).collect::<Vec<String>>();
-
-    sqlx::query!(
-        "UPDATE repos SET events = $1 WHERE id = $2 AND guild_id = $3",
-        &events_vec,
-        id,
-        ctx.guild_id().unwrap().to_string()
-    )
-    .execute(&data.pool)
-    .await?;
-
-    ctx.say("Events set!").await?;
-
-    Ok(())
-}
-
-/// Deletes a event whitelist for a repository
-#[poise::command(slash_command, prefix_command, guild_only, guild_cooldown = 60, required_permissions = "MANAGE_GUILD")]
-pub async fn delrepoevents(
-    ctx: Context<'_>,
-    #[description = "The repo ID"] id: String,
-) -> Result<(), Error> { 
-    let data = ctx.data();
-
-    // Check if the repo exists
-    let repo = sqlx::query!(
-        "SELECT COUNT(1) FROM repos WHERE id = $1 AND guild_id = $2",
-        id,
-        ctx.guild_id().unwrap().to_string()
-    )
-    .fetch_one(&data.pool)
-    .await?;
-
-    if repo.count.unwrap_or_default() == 0 {
-        return Err("That repo doesn't exist! Use ``/newrepo`` (or ``git!newrepo``) to create one".into());
-    }
-
-    sqlx::query!(
-        "UPDATE repos SET events = $1 WHERE id = $2 AND guild_id = $3",
-        &vec![],
-        id,
-        ctx.guild_id().unwrap().to_string()
-    )
-    .execute(&data.pool)
-    .await?;
-
-    ctx.say("Events cleared!").await?;
 
     Ok(())
 }

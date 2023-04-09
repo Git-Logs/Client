@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 	"webserver/config"
-	_ "webserver/eventmodifiers"
+	"webserver/eventmodifiers"
 	"webserver/events"
 
 	"github.com/bwmarrin/discordgo"
@@ -36,6 +36,24 @@ var (
 type RepoWrapper struct {
 	Repo   events.Repository `json:"repository"`
 	Action string            `json:"action"`
+}
+
+func sendWebhToChannel(
+	msg discordgo.MessageSend,
+	event string,
+	channelId string,
+) string {
+	_, err := discord.ChannelMessageSendComplex(channelId, &msg)
+
+	if err != nil {
+		discord.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
+			Content: "Could not send event " + event + " to channel: <#" + channelId + ">:" + err.Error(),
+		})
+
+		return err.Error()
+	}
+
+	return ""
 }
 
 func webhookRoute(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +81,27 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 		respStr.WriteString("Comment: " + comment + "\n\n")
 
-		repos, err := pool.Query(ctx, "SELECT id, repo_name, events, channel_id, created_at FROM repos WHERE webhook_id = $1", id)
+		// Get all event modifiers on this webhook
+		modifiers, err := eventmodifiers.GetEventModifiers(ctx, pool, id, "")
+
+		if err != nil {
+			respStr.WriteString("Error: " + err.Error() + " in fetching event modifiers for webhook\n")
+		} else {
+			respStr.WriteString("Event modifiers:\n\n")
+
+			for _, modifier := range modifiers {
+				respStr.WriteString(fmt.Sprintf("ID: %s\n", modifier.ID))
+				respStr.WriteString(fmt.Sprintf("Events: %s\n", modifier.Events))
+				respStr.WriteString(fmt.Sprintf("RepoID: %s\n", modifier.RepoID))
+				respStr.WriteString(fmt.Sprintf("Blacklisted: %t\n", modifier.Blacklisted))
+				respStr.WriteString(fmt.Sprintf("Whitelisted: %t\n", modifier.Whitelisted))
+				respStr.WriteString(fmt.Sprintf("Redirect Channel: %s\n", modifier.RedirectChannel))
+			}
+
+			respStr.WriteString("\n\n")
+		}
+
+		repos, err := pool.Query(ctx, "SELECT id, repo_name, channel_id, created_at FROM repos WHERE webhook_id = $1", id)
 
 		if err == nil {
 			respStr.WriteString("This webhook is for the following repos:\n\n")
@@ -71,11 +109,10 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 			for repos.Next() {
 				var repoID string
 				var repoName string
-				var events []string
 				var channelID string
 				var createdAt time.Time
 
-				err = repos.Scan(&repoID, &repoName, &events, &channelID, &createdAt)
+				err = repos.Scan(&repoID, &repoName, &channelID, &createdAt)
 
 				if err != nil {
 					respStr.WriteString("Error: " + err.Error() + " in fetching a repo \n")
@@ -84,11 +121,6 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 
 				respStr.WriteString("Repo: " + repoName + "\n")
 				respStr.WriteString("Repo ID: " + repoID + "\n")
-				if len(events) > 0 {
-					respStr.WriteString("Allowed Events: " + strings.Join(events, ", ") + "\n")
-				} else {
-					respStr.WriteString("This repository does not have a repo whitelist. All events will be responded to!\n")
-				}
 				respStr.WriteString("Channel ID: " + channelID + "\n")
 				respStr.WriteString("Created At: " + createdAt.Format(time.RFC3339) + "\n\n")
 			}
@@ -102,8 +134,6 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var secret string
-	var repoName string
-	var allowedEvents []string
 
 	id := r.URL.Query().Get("id")
 
@@ -158,47 +188,41 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var header = r.Header.Get("X-GitHub-Event")
+	fmt.Println(header)
 
 	// Get repo_name from database
-	err = pool.QueryRow(ctx, "SELECT repo_name, events FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoName, &allowedEvents)
+	var repoName string
+	var repoID string
+	err = pool.QueryRow(ctx, "SELECT id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoID, &repoName)
 
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusPartialContent)
-		w.Write([]byte("This request has an invalid repo_url parameter"))
+		w.Write([]byte("This request has an invalid repo parameter"))
+		return
+	}
+
+	// Check event modifiers
+	modres, err := eventmodifiers.CheckEventAllowed(ctx, pool, id, repoID, header)
+
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusPartialContent)
+		w.Write([]byte("Could not check event modifiers: " + err.Error()))
+	}
+
+	if modres == nil {
+		panic("Event modifier is nil")
+	}
+
+	if modres.ACLFail != "" {
+		fmt.Println("ACL Fail: " + modres.ACLFail)
+		w.WriteHeader(http.StatusPartialContent)
+		w.Write([]byte(modres.ACLFail))
 		return
 	}
 
 	var messageSend discordgo.MessageSend
-
-	fmt.Println(header)
-
-	if len(allowedEvents) > 0 {
-		var gotAllowedEvent bool
-
-		// Check if we have this event in the allowed events
-		for _, evt := range allowedEvents {
-			evtSplit := strings.SplitN(evt, ".", 2)
-
-			if header == evtSplit[0] {
-				if len(evtSplit) > 1 {
-					if rw.Action == evtSplit[1] {
-						gotAllowedEvent = true
-						break
-					}
-				}
-
-				gotAllowedEvent = true
-				break
-			}
-		}
-
-		if !gotAllowedEvent {
-			w.WriteHeader(206)
-			w.Write([]byte("This event is not allowed for this repo"))
-			return
-		}
-	}
 
 	evtFn, ok := events.SupportedEvents[header]
 
@@ -217,48 +241,56 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get channel ID from database
-	rows, err := pool.Query(ctx, "SELECT channel_id FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id)
-
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(404)
-		w.Write([]byte("This request has an invalid repo_url parameter"))
-		return
-	}
-
-	defer rows.Close()
-
 	var errors string
 
-	for rows.Next() {
-		var channelId string
+	// Channel override comes from the event modifier, in the case of an event modifier, we only send
+	// to the channel specified in the event modifier, not to all channels set
+	if modres.ChannelOverride != "" {
+		err := sendWebhToChannel(
+			messageSend,
+			header,
+			modres.ChannelOverride,
+		)
 
-		err = rows.Scan(&channelId)
+		if err != "" {
+			errors += "-" + err
+		}
+	} else {
+		// Get channel ID from database
+		rows, err := pool.Query(ctx, "SELECT channel_id FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id)
 
 		if err != nil {
 			fmt.Println(err)
-			continue
+			w.WriteHeader(404)
+			w.Write([]byte("This request has an invalid repo_url parameter"))
+			return
 		}
 
-		_, err = discord.ChannelMessageSendComplex(channelId, &messageSend)
+		defer rows.Close()
 
-		if err != nil {
-			errors += err.Error()
+		for rows.Next() {
+			var channelId string
 
-			gotError := err.Error()
+			err = rows.Scan(&channelId)
 
-			if len(gotError) > 1020 {
-				gotError = gotError[:1020] + "..."
+			if err != nil {
+				fmt.Println(err)
+				continue
 			}
 
-			discord.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
-				Content: "Could not send event " + header + " to channel: <#" + channelId + ">:" + gotError,
-			})
+			err := sendWebhToChannel(
+				messageSend,
+				header,
+				channelId,
+			)
+
+			if err != "" {
+				errors += "-" + err + "\n"
+			}
 		}
 	}
 
-	w.Write([]byte("OK: " + repoName + "\n" + errors))
+	w.Write([]byte("OK: " + repoName + "\n\nErrors:\n" + errors))
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
