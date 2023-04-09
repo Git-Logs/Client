@@ -11,10 +11,10 @@ type DiscussionCommentEvent struct {
 	Repo    Repository `json:"repository"` // The repository where this event was created
 	Sender  User       `json:"sender"`     // The user who sent/created the event
 	Comment struct {
-		Author     User      `json:"user"`       // Author of the comment
-		Content    string    `json:"body"`       // The content of the comment
-		Created    time.Time `json:"created_at"` // Comment creation
-		CommentUrl string    `json:"html_url"`   // Url to the comment
+		Author  User      `json:"user"`       // Author of the comment
+		Content string    `json:"body"`       // The content of the comment
+		Created time.Time `json:"created_at"` // Comment creation
+		Url     string    `json:"html_url"`   // Url to the comment
 	} `json:"comment"`
 	Discussion struct {
 		Title    string `json:"title"` // The title of the origin discussion
@@ -23,8 +23,8 @@ type DiscussionCommentEvent struct {
 			Answerable  bool   `json:"is_answerable"` // If the discussion can have a valid answer
 			Description string `json:"description"`   // The description of the discussion category
 		} `json:"category"`
-		DiscussionDate time.Time `json:"created_at"` // Date the discussion was created
-		DiscussionURL  string    `json:"html_url"`   // URL to the discussion
+		Date time.Time `json:"created_at"` // Date the discussion was created
+		Url  string    `json:"html_url"`   // URL to the discussion
 	} `json:"discussion"`
 }
 
@@ -43,7 +43,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 	case "created":
 
 		if len(gh.Comment.Content) > 3000 {
-			gh.Comment.Content = gh.Comment.Content[:3000] + "..."
+			gh.Comment.Content = gh.Comment.Content[:3000] + "... [Read More](" + gh.Comment.Url + ")"
 		}
 
 		if len(gh.Discussion.Title) > 200 {
@@ -66,7 +66,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Comment Author",
-							Value:  gh.Comment.Author.AuthorEmbed().Name,
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
@@ -106,7 +106,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Comment Author",
-							Value:  gh.Comment.Author.AuthorEmbed().Name,
+							Value:  gh.Comment.Author.Link(),
 							Inline: false,
 						},
 						{
@@ -146,7 +146,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Comment Author",
-							Value:  gh.Comment.Author.AuthorEmbed().Name,
+							Value:  gh.Comment.Author.Link(),
 							Inline: false,
 						},
 						{
@@ -156,7 +156,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Deleted By",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 					},
@@ -167,6 +167,38 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 
 	default:
 
-		return discordgo.MessageSend{}, err
+		if len(gh.Discussion.Title) > 200 {
+			gh.Discussion.Title = gh.Discussion.Title[:200] + "... [View Discussion](" + gh.Discussion.Url + ")"
+		}
+
+		return discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					URL:         gh.Repo.HTMLURL,
+					Color:       colorRed,
+					Author:      gh.Sender.AuthorEmbed(),
+					Title:       "Discussion Comment Updated",
+					Description: "It looks like this comment has received a update that is not tracked by our systems yet!",
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "Repository",
+							Value:  gh.Repo.FullName,
+							Inline: false,
+						},
+						{
+							Name:   "Discussion",
+							Value:  gh.Discussion.Title,
+							Inline: false,
+						},
+						{
+							Name:   "Comment Author",
+							Value:  gh.Comment.Author.Link(),
+							Inline: false,
+						},
+					},
+					Timestamp: gh.Comment.Created.Format(time.RFC3339),
+				},
+			},
+		}, nil
 	}
 }

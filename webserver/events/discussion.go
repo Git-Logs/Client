@@ -17,10 +17,10 @@ type DiscussionEvent struct {
 	} `json:"label"`
 	Discussion struct {
 		Title            string `json:"title"`              // The title of the origin discussion
-		AnswerPoster     User   `json:"user"`               // The user who originally posted the discussion/answer
-		AnswerChosenBy   User   `json:"answer_chosen_by"`   // The user who marked the answer as correct
+		Author           User   `json:"user"`               // The user who originally posted the discussion/answer
+		Created          string `json:"answer_chosen_at"`   // The date the answer was chosen at
+		AnswerSubmitter  User   `json:"answer_chosen_by"`   // The user who marked the answer as correct
 		ActiveLockReason string `json:"active_lock_reason"` // Reason for the discussion being locked (no comments allowed)
-		AnswerChosenAt   string `json:"answer_chosen_at"`   // The date the answer was chosen at
 		AnswerHtmlUrl    string `json:"answer_html_url"`    // URL To the answer/comment
 		AnswerRespBody   string `json:"body"`               // Body/content of the answer
 		Category         struct {
@@ -48,7 +48,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Someone posted a suggested answer/fix
 	case "answered":
 
-		var title string = "Discussion has been Answered"
+		var title string = "Discussion Answered"
 
 		var locked = gh.Discussion.ActiveLockReason
 
@@ -59,11 +59,11 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 		}
 
 		if len(gh.Discussion.AnswerRespBody) > 3000 {
-			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "..."
+			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -82,12 +82,12 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Answer Selected By",
-							Value:  gh.Sender.Link(),
+							Value:  gh.Discussion.AnswerSubmitter.Link(),
 							Inline: true,
 						},
 						{
 							Name:   "Answer Posted By",
-							Value:  gh.Discussion.AnswerPoster.Link(),
+							Value:  gh.Discussion.Author.Link(),
 							Inline: true,
 						},
 						{
@@ -119,8 +119,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Someone changed the category of the discussion
 	case "category_changed":
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -156,8 +156,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Someone closed the discussion and comments are no longer allowed
 	case "closed":
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "..."
 		}
 
 		return discordgo.MessageSend{
@@ -176,12 +176,12 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Closed By",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
 							Name:   "Created By",
-							Value:  gh.Discussion.AnswerPoster.AuthorEmbed().Name,
+							Value:  gh.Discussion.Author.Link(),
 							Inline: false,
 						},
 						{
@@ -198,8 +198,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Discussion has been reopened
 	case "reopened":
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -217,13 +217,13 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 							Inline: false,
 						},
 						{
-							Name:   "Closed By",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Name:   "Opened By",
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
 							Name:   "Created By",
-							Value:  gh.Discussion.AnswerPoster.AuthorEmbed().Name,
+							Value:  gh.Discussion.Author.Link(),
 							Inline: false,
 						},
 						{
@@ -240,12 +240,12 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Someone created a new discussion
 	case "created":
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		if len(gh.Discussion.AnswerRespBody) > 3000 {
-			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "..."
+			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -264,7 +264,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Author",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
@@ -312,11 +312,11 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	case "edited":
 
 		if len(gh.Discussion.AnswerRespBody) > 3000 {
-			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "..."
+			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -355,8 +355,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			defaultString = "No"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -394,7 +394,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 						},
 						{
 							Name:   "Added By",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
@@ -416,13 +416,13 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 		if gh.Discussion.ActiveLockReason == "" {
 			lockedReason = "No reason provided"
 		} else if len(gh.Discussion.ActiveLockReason) > 999 {
-			lockedReason = gh.Discussion.AnswerRespBody[:999] + "..."
+			lockedReason = gh.Discussion.AnswerRespBody[:999] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		} else {
 			lockedReason = gh.Discussion.ActiveLockReason
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -445,8 +445,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 							Inline: false,
 						},
 						{
-							Name:   "Moderator",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Name:   "Locked By",
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
@@ -463,8 +463,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Discussion has been unlocked
 	case "unlocked":
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -482,8 +482,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 							Inline: false,
 						},
 						{
-							Name:   "Moderator",
-							Value:  gh.Sender.AuthorEmbed().Name,
+							Name:   "Unlocked By",
+							Value:  gh.Sender.Link(),
 							Inline: false,
 						},
 						{
@@ -501,11 +501,11 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	case "pinned":
 
 		if len(gh.Discussion.AnswerRespBody) > 3000 {
-			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "..."
+			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -522,6 +522,21 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 							Value:  gh.Discussion.Title,
 							Inline: false,
 						},
+						{
+							Name:   "Category",
+							Value:  gh.Discussion.Category.Name,
+							Inline: false,
+						},
+						{
+							Name:   "Author",
+							Value:  gh.Discussion.Author.Link(),
+							Inline: false,
+						},
+						{
+							Name:   "Pinned By",
+							Value:  gh.Sender.Link(),
+							Inline: false,
+						},
 					},
 					Timestamp: gh.Discussion.DiscussionDate.Format(time.RFC3339),
 				},
@@ -532,11 +547,11 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	case "unpinned":
 
 		if len(gh.Discussion.AnswerRespBody) > 3000 {
-			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "..."
+			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
@@ -553,6 +568,21 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 							Value:  gh.Discussion.Title,
 							Inline: false,
 						},
+						{
+							Name:   "Category",
+							Value:  gh.Discussion.Category.Name,
+							Inline: false,
+						},
+						{
+							Name:   "Author",
+							Value:  gh.Discussion.Author.Link(),
+							Inline: false,
+						},
+						{
+							Name:   "Unpinned By",
+							Value:  gh.Sender.Link(),
+							Inline: false,
+						},
 					},
 					Timestamp: gh.Discussion.DiscussionDate.Format(time.RFC3339),
 				},
@@ -562,8 +592,8 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 	// Default response if we do not track the requested discussion event
 	default:
 
-		if len(gh.Discussion.Title) > 200 {
-			gh.Discussion.Title = gh.Discussion.Title[:200] + "..."
+		if len(gh.Discussion.Title) > 190 {
+			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
 		return discordgo.MessageSend{
