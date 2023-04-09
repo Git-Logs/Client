@@ -32,6 +32,8 @@ var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, erro
 	"commit_comment":              commitCommentFn,
 	"deployment":                  deploymentFn,
 	"deployment_status":           deploymentStatusFn,
+	"discussion":                  discussionFn,
+	"discussion_comment":          discussionCommentFn,
 	"workflow_run":                workflowRunFn,
 	"dependabot_alert":            dependabotAlertFn,
 	"delete":                      deleteFn,
