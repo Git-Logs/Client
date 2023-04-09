@@ -12,7 +12,7 @@ pub struct Config {
     pub database_url: String,
     pub token: String,
     pub api_url: String,
-    pub proxy_url: Option<String>
+    pub proxy_url: Option<String>,
 }
 
 impl Default for Config {

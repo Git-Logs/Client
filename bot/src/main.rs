@@ -11,6 +11,7 @@ mod help;
 mod core;
 mod backups;
 mod config;
+mod eventmods;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -133,7 +134,6 @@ async fn main() {
                 help::simplehelp(),
                 help::help(),
                 core::list(),
-                core::cmdref(),
                 core::newhook(),
                 core::newrepo(),
                 core::delhook(),
@@ -141,7 +141,8 @@ async fn main() {
                 core::setrepochannel(),
                 core::resetsecret(),
                 backups::backup(),
-                backups::restore()
+                backups::restore(),
+                eventmods::eventmod(),
             ],
             /// This code is run before every command
             pre_command: |ctx| {

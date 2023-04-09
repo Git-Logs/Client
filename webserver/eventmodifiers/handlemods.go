@@ -26,6 +26,7 @@ type EventModifier struct {
 	Blacklisted     bool
 	Whitelisted     bool
 	RedirectChannel string
+	Priority        int
 }
 
 func GetEventModifiers(
@@ -35,7 +36,7 @@ func GetEventModifiers(
 	ghRepoId string,
 ) ([]*EventModifier, error) {
 	// Get all event_modifiers for webhook
-	rows, err := db.Query(ctx, "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel FROM event_modifiers WHERE webhook_id = $1 ORDER BY priority DESC", webhookId)
+	rows, err := db.Query(ctx, "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1 ORDER BY priority DESC", webhookId)
 
 	if err != nil {
 		return nil, err
@@ -52,8 +53,9 @@ func GetEventModifiers(
 		var blacklisted bool
 		var whitelisted bool
 		var redirectChannel pgtype.Text
+		var priority int
 
-		err = rows.Scan(&id, &repoId, &events, &blacklisted, &whitelisted, &redirectChannel)
+		err = rows.Scan(&id, &repoId, &events, &blacklisted, &whitelisted, &redirectChannel, &priority)
 
 		if err != nil {
 			return nil, err
@@ -75,6 +77,7 @@ func GetEventModifiers(
 			Blacklisted:     blacklisted,
 			Whitelisted:     whitelisted,
 			RedirectChannel: redirectChannel.String,
+			Priority:        priority,
 		})
 	}
 

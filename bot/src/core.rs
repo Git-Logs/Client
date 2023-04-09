@@ -4,54 +4,6 @@ use rand::{distributions::{Alphanumeric, DistString}};
 
 use crate::{Context, Error, config};
 
-/// Command reference
-#[poise::command(slash_command, prefix_command, guild_only)]
-pub async fn cmdref(
-    ctx: Context<'_>,
-) -> Result<(), Error> {
-    ctx.say(
-        "
-- **newhook:** newhook <comment>
-
-EX: ``newhook 'My new webhook'``
-
-- **delhook:** delhook <webhook id>
-
-EX: ``delhook ID``
-
-- **list:** list
-
-EX: ``list``
-
-- **newrepo:** newrepo <webhook id> <repo org/owner> <repo name> <channel_id>
-
-EX: ``newrepo ID Git-Logs MyRepo #github``
-
-- **delrepo:** delrepo <repo id>
-
-EX: ``delrepo ID``
-
-- **setrepochannel:** delrepoevents <repo id>
-
-EX: ``delrepoevents ID``
-
-- **setrepochannel:** setrepochannel <repo id> <channel_id>
-
-EX: ``setrepochannel ID #github``
-
-- **resetsecret** <webhook id>
-
-EX: ``resetsecret ID``
-
-- **backuprepos** <webhook id>
-
-EX: ``backuprepos ID``
-        "
-    ).await?;
-
-    Ok(())
-}
-
 /// Lsts all webhooks in a guild with their respective repos and channel IDs
 #[poise::command(slash_command, prefix_command, guild_only, required_permissions = "MANAGE_GUILD")]
 pub async fn list(
@@ -152,8 +104,8 @@ pub async fn newhook(
     .fetch_one(&data.pool)
     .await?;
 
-    if webhook_count.count.unwrap_or_default() >= 3 {
-        ctx.say("You can't have more than 3 webhooks per guild").await?;
+    if webhook_count.count.unwrap_or_default() >= 5 {
+        ctx.say("You can't have more than 5 webhooks per guild").await?;
         return Ok(());
     }
 

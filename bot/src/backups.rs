@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 
 use crate::{Context, Error};
 
-const PROTOCOL: u8 = 1;
+const PROTOCOL: u8 = 2;
 
 #[derive(Serialize, Deserialize)]
 struct Repo {
@@ -20,6 +20,7 @@ struct EventModifier {
     blacklisted: bool,
     whitelisted: bool,
     redirect_channel: Option<String>,
+    priority: i32,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -87,7 +88,7 @@ pub async fn backup(
 
     // Fetch the event modifiers
     let rows = sqlx::query!(
-        "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel FROM event_modifiers WHERE webhook_id = $1",
+        "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1",
         id
     )
     .fetch_all(&data.pool)
@@ -103,6 +104,7 @@ pub async fn backup(
             blacklisted: row.blacklisted,
             whitelisted: row.whitelisted,
             redirect_channel: row.redirect_channel,
+            priority: row.priority,
         });
     }
 
@@ -244,14 +246,16 @@ Please contact our support team.
         if event_modifier_exists.count.unwrap_or_default() == 0 {
             // If it doesn't, create it
             sqlx::query!(
-                "INSERT INTO event_modifiers (id, repo_id, events, blacklisted, whitelisted, redirect_channel, webhook_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                "INSERT INTO event_modifiers (id, repo_id, events, blacklisted, whitelisted, redirect_channel, webhook_id, guild_id, priority) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
                 event_modifier.event_modifier_id,
                 event_modifier.repo_id,
                 &event_modifier.events,
                 event_modifier.blacklisted,
                 event_modifier.whitelisted,
                 event_modifier.redirect_channel,
-                id
+                id,
+                ctx.guild_id().unwrap().to_string(),
+                event_modifier.priority,
             )
             .execute(&data.pool)
             .await?;
@@ -260,12 +264,13 @@ Please contact our support team.
         } else {
             // If it does, update it
             sqlx::query!(
-                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5 WHERE id = $6 AND webhook_id = $7",
+                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5, priority = $6 WHERE id = $7 AND webhook_id = $8",
                 event_modifier.repo_id,
                 &event_modifier.events,
                 event_modifier.blacklisted,
                 event_modifier.whitelisted,
                 event_modifier.redirect_channel,
+                event_modifier.priority,
                 event_modifier.event_modifier_id,
                 id
             )

@@ -85,9 +85,9 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		modifiers, err := eventmodifiers.GetEventModifiers(ctx, pool, id, "")
 
 		if err != nil {
-			respStr.WriteString("Error: " + err.Error() + " in fetching event modifiers for webhook\n")
+			respStr.WriteString("ERROR: " + err.Error() + " in fetching event modifiers for webhook\n")
 		} else {
-			respStr.WriteString("Event modifiers:\n\n")
+			respStr.WriteString("EventModifiers:\n\n")
 
 			for _, modifier := range modifiers {
 				respStr.WriteString(fmt.Sprintf("ID: %s\n", modifier.ID))
@@ -96,6 +96,8 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 				respStr.WriteString(fmt.Sprintf("Blacklisted: %t\n", modifier.Blacklisted))
 				respStr.WriteString(fmt.Sprintf("Whitelisted: %t\n", modifier.Whitelisted))
 				respStr.WriteString(fmt.Sprintf("Redirect Channel: %s\n", modifier.RedirectChannel))
+				respStr.WriteString(fmt.Sprintf("Priority: %d\n", modifier.Priority))
+				respStr.WriteString(fmt.Sprintf("\n"))
 			}
 
 			respStr.WriteString("\n\n")
@@ -104,7 +106,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 		repos, err := pool.Query(ctx, "SELECT id, repo_name, channel_id, created_at FROM repos WHERE webhook_id = $1", id)
 
 		if err == nil {
-			respStr.WriteString("This webhook is for the following repos:\n\n")
+			respStr.WriteString("Repositories:\n\n")
 
 			for repos.Next() {
 				var repoID string
