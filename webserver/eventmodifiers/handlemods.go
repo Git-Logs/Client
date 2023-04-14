@@ -17,6 +17,10 @@ type EventCheck struct {
 
 	// What channel to redirect to
 	ChannelOverride string
+
+	// Overridden by higher priority modifiers
+	// Only applies to whitelists
+	Overriden bool
 }
 
 type EventModifier struct {
@@ -113,6 +117,12 @@ func CheckEventAllowed(
 		if !matched {
 			// Ensure that the modifier does not set whitelisted to true
 			if modifier.Whitelisted {
+				// Check if theres also a matching redirect channel
+				if resultantEventCheck.Overriden {
+					// We can short-circuit here because we have a matching redirect channel on a higher priority modifier
+					return resultantEventCheck, nil
+				}
+
 				return &EventCheck{
 					ACLFail: "event_modifier " + modifier.ID + ": whitelist-only event modifier but event not matched",
 				}, nil
@@ -131,6 +141,7 @@ func CheckEventAllowed(
 		// Set the channel override if it's not null on the modifier
 		if modifier.RedirectChannel != "" {
 			resultantEventCheck.ChannelOverride = modifier.RedirectChannel
+			resultantEventCheck.Overriden = true
 		}
 
 		// We cannot short-circuit here because we may have modifiers matching the same event
