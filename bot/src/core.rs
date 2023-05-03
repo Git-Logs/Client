@@ -42,13 +42,15 @@ pub async fn list(
             Ok(webhooks) => {
                 let mut embeds = Vec::new();
                     
+                let api_url = config::CONFIG.api_url[0].clone();
+
                 for webhook in webhooks {
                     let webhook_id = webhook.id;
                     embeds.push(
                         CreateEmbed::new()
                         .title(format!("Webhook \"{}\"", webhook.comment))
                         .field("Webhook ID", &webhook_id, false)
-                        .field("Hook URL (visit for hook info, add to Github to recieve events)", config::CONFIG.api_url.clone()+"/kittycat?id="+&webhook_id, false)
+                        .field("Hook URL (visit for hook info, add to Github to recieve events)", api_url.clone()+"/kittycat?id="+&webhook_id, false)
                         .field("Created at", webhook.created_at.to_string(), false)
                     );
                 };
@@ -148,12 +150,15 @@ Next, add the following webhook to your Github repositories (or organizations): 
 Set the `Secret` field to `{webh_secret}` and ensure that Content Type is set to `application/json`. 
 
 When creating repositories, use `{id}` as the ID.
+
+**Backup domains (replace {api_url} with these if gitlogs fails):** {api_domains}
             
 **Note that the above URL and secret is unique and should not be shared with others**
 
 **Delete this message after you're done!**
                 ",
-                api_url=config::CONFIG.api_url,
+                api_url=config::CONFIG.api_url[0],
+                api_domains=config::CONFIG.api_url.join(", "),
                 id=id,
                 webh_secret=webh_secret
             )    

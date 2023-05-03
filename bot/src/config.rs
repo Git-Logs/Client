@@ -11,7 +11,7 @@ pub static CONFIG: Lazy<Config> = Lazy::new(|| Config::load().expect("Failed to 
 pub struct Config {
     pub database_url: String,
     pub token: String,
-    pub api_url: String,
+    pub api_url: Vec<String>,
     pub proxy_url: Option<String>,
 }
 
@@ -20,7 +20,7 @@ impl Default for Config {
         Self {
             database_url: String::from(""),
             token: String::from(""),
-            api_url: String::from("https://v2.gitlogs.xyz"),
+            api_url: vec![String::from("https://v2.gitlogs.xyz")],
             proxy_url: Some(String::from("http://127.0.0.1:3219")),
         }
     }
@@ -46,6 +46,10 @@ impl Config {
             Ok(file) => {
                 // Parse config.yaml
                 let cfg: Config = serde_yaml::from_reader(file)?;
+
+                if cfg.api_url.is_empty() {
+                    panic!("At least one api URL must be provided")
+                }
 
                 // Return config
                 Ok(cfg)
