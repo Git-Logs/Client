@@ -158,7 +158,7 @@ When creating repositories, use `{id}` as the ID.
 **Delete this message after you're done!**
                 ",
                 api_url=config::CONFIG.api_url[0],
-                api_domains=config::CONFIG.api_url.join(", "),
+                api_domains=config::CONFIG.api_url[1..].join(", "),
                 id=id,
                 webh_secret=webh_secret
             )    
