@@ -11,6 +11,15 @@ CREATE TABLE webhooks (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE repos (
+    id TEXT PRIMARY KEY NOT NULL,
+    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    webhook_id TEXT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    repo_name TEXT NOT NULL,
+    channel_id TEXT NOT NULL, -- Channel ID to post to
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE event_modifiers (
     id TEXT PRIMARY KEY NOT NULL,
     guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -21,13 +30,4 @@ CREATE TABLE event_modifiers (
     whitelisted boolean not null default false, -- Whether or not only these events can be sent
     redirect_channel TEXT, -- Channel ID to redirect to, otherwise use default channel
     priority INTEGER NOT NULL -- Priority to apply the modifiers in, applied in descending order
-);
-
-CREATE TABLE repos (
-    id TEXT PRIMARY KEY NOT NULL,
-    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    webhook_id TEXT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    repo_name TEXT NOT NULL,
-    channel_id TEXT NOT NULL, -- Channel ID to post to
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

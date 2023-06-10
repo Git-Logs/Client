@@ -1,0 +1,7 @@
+language: rust
+project: "github-v2"
+binary: "bot"
+service: "github-bot"
+lang_opts:
+env:
+  DATABASE_URL: postgres://localhost/github 

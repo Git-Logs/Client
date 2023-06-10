@@ -19,7 +19,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
-	"github.com/infinitybotlist/genconfig"
+	"github.com/infinitybotlist/eureka/genconfig"
 	"github.com/jackc/pgx/v5/pgxpool"
 	jsoniter "github.com/json-iterator/go"
 	"gopkg.in/yaml.v3"

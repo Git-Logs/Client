@@ -1,0 +1,6 @@
+language: go
+project: "github-v2"
+binary: "webserver"
+service: "github-api"
+lang_opts:
+env:
