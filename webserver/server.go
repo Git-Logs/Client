@@ -20,6 +20,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/infinitybotlist/eureka/crypto"
+	"github.com/infinitybotlist/eureka/zapchi"
 	"go.uber.org/zap"
 )
 
@@ -215,7 +216,7 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 	logId := crypto.RandString(128)
 
 	w.Write([]byte(
-		"View possible logs: " + state.Config.APIUrl + "/audit/" + logId + "\n",
+		"View possible logs: " + state.Config.APIUrl + "/audit?log_id=" + logId + "\n",
 	))
 
 	// Check event modifiers
@@ -321,6 +322,8 @@ func webhookRoute(w http.ResponseWriter, r *http.Request) {
 				return err
 			}
 
+			//txn.Commit()
+
 			return nil
 		})
 
@@ -346,6 +349,45 @@ You may also be looking for:
 `))
 }
 
+func auditEvent(w http.ResponseWriter, r *http.Request) {
+	logId := r.URL.Query().Get("log_id")
+
+	if logId == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Missing log_id parameter"))
+		return
+	}
+
+	var log string
+
+	err := state.Badger.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(logId))
+
+		if err != nil {
+			return err
+		}
+
+		val, err := item.ValueCopy(nil)
+
+		if err != nil {
+			return err
+		}
+
+		log = string(val)
+
+		return nil
+	})
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error getting log: " + err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(log))
+}
+
 func main() {
 	state.Setup()
 
@@ -353,11 +395,12 @@ func main() {
 
 	r := chi.NewMux()
 
-	r.Use(middleware.Logger, middleware.Recoverer, middleware.RealIP, middleware.RequestID, middleware.Timeout(60*time.Second))
+	r.Use(zapchi.Logger(state.Logger.Sugar().Named("zapchi"), "api"), middleware.Recoverer, middleware.RealIP, middleware.RequestID, middleware.Timeout(60*time.Second))
 
 	// Webhook route
 	r.HandleFunc("/kittycat", webhookRoute)
 	r.HandleFunc("/", index)
+	r.HandleFunc("/audit", auditEvent)
 
 	// API
 	r.HandleFunc("/api/counts", stats)

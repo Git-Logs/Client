@@ -78,7 +78,7 @@ func Setup() {
 	}
 
 	Logger.Info("Connecting to service [badger]")
-	Badger, err = badger.Open(badger.DefaultOptions("/tmp/badger").WithIndexCacheSize(100 << 20))
+	Badger, err = badger.Open(badger.DefaultOptions("/silverpelt/nightheart/badger").WithIndexCacheSize(100 << 20))
 	if err != nil {
 		Logger.Fatal("Could not open badger", zap.Error(err))
 	}
