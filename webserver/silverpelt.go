@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"webserver/events"
+	"webserver/state"
 )
 
 // Precomputed values
@@ -20,11 +21,11 @@ func init() {
 
 func stats(w http.ResponseWriter, r *http.Request) {
 	// Get guild count
-	guildCount := len(discord.State.Guilds)
+	guildCount := len(state.Discord.State.Guilds)
 	var userCount int
-	var shardCount = discord.ShardCount
+	var shardCount = state.Discord.ShardCount
 
-	for _, guild := range discord.State.Guilds {
+	for _, guild := range state.Discord.State.Guilds {
 		userCount += guild.MemberCount
 	}
 
@@ -38,7 +39,7 @@ func eventsListView(w http.ResponseWriter, r *http.Request) {
 		events = append(events, "- "+event)
 	}
 
-	w.Write([]byte(strings.Join(eventList, "\n")))
+	w.Write([]byte(strings.Join(events, "\n")))
 }
 
 func eventsCommaSepView(w http.ResponseWriter, r *http.Request) {

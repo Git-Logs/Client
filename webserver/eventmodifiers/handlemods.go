@@ -1,10 +1,9 @@
 package eventmodifiers
 
 import (
-	"context"
+	"webserver/state"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func isNull(s pgtype.Text) bool {
@@ -34,13 +33,11 @@ type EventModifier struct {
 }
 
 func GetEventModifiers(
-	ctx context.Context,
-	db *pgxpool.Pool,
 	webhookId string,
 	ghRepoId string,
 ) ([]*EventModifier, error) {
 	// Get all event_modifiers for webhook
-	rows, err := db.Query(ctx, "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1 ORDER BY priority DESC", webhookId)
+	rows, err := state.Pool.Query(state.Context, "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1 ORDER BY priority DESC", webhookId)
 
 	if err != nil {
 		return nil, err
@@ -89,14 +86,12 @@ func GetEventModifiers(
 }
 
 func CheckEventAllowed(
-	ctx context.Context,
-	db *pgxpool.Pool,
 	webhookId string,
 	ghRepoId string,
 	ghEvent string,
 ) (*EventCheck, error) {
 	// Get all event_modifiers for webhook
-	modifiers, err := GetEventModifiers(ctx, db, webhookId, ghRepoId)
+	modifiers, err := GetEventModifiers(webhookId, ghRepoId)
 
 	if err != nil {
 		return nil, err

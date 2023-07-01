@@ -10,9 +10,13 @@ require (
 	github.com/infinitybotlist/eureka v0.0.0-20230701173919-c46a912122f9
 	github.com/jackc/pgx/v5 v5.4.1
 	github.com/json-iterator/go v1.1.12
-	go.uber.org/zap v1.24.0
 	golang.org/x/text v0.10.0
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 )
 
 require (
@@ -39,8 +43,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
