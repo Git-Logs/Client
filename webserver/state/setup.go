@@ -78,6 +78,4 @@ func Setup() {
 	if err != nil {
 		Logger.Fatal("Could not open discord connection", zap.Error(err))
 	}
-
-	Logger.Info("Connecting to service [badger]")
 }
