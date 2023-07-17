@@ -1,10 +1,11 @@
-package main
+// Ontos (Xenoblade Chronicles 2), the core component that recieves requests passing it down to Pneuma/Logos
+package ontos
 
 import (
 	"fmt"
 	"net/http"
 	"strings"
-	"webserver/events"
+	"webserver/logos/events"
 	"webserver/state"
 )
 
@@ -19,7 +20,7 @@ func init() {
 	}
 }
 
-func stats(w http.ResponseWriter, r *http.Request) {
+func ApiStats(w http.ResponseWriter, r *http.Request) {
 	// Get guild count
 	guildCount := len(state.Discord.State.Guilds)
 	var userCount int
@@ -32,7 +33,7 @@ func stats(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("%d,%d,%d", guildCount, userCount, shardCount)))
 }
 
-func eventsListView(w http.ResponseWriter, r *http.Request) {
+func ApiEventsListView(w http.ResponseWriter, r *http.Request) {
 	events := []string{}
 
 	for _, event := range eventList {
@@ -42,6 +43,6 @@ func eventsListView(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strings.Join(events, "\n")))
 }
 
-func eventsCommaSepView(w http.ResponseWriter, r *http.Request) {
+func ApiEventsCommaSepView(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strings.Join(eventList, ",")))
 }

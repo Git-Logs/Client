@@ -1,85 +1,28 @@
 package state
 
 import (
-	"os"
+	"context"
 	"webserver/config"
+	"webserver/mapofmu"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dgraph-io/badger/v4"
-	"github.com/infinitybotlist/eureka/genconfig"
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
+	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gopkg.in/yaml.v3"
 )
 
-func Setup() {
-	// Initialize logger
-	w := zapcore.AddSync(os.Stdout)
+var (
+	Json      = jsoniter.ConfigCompatibleWithStandardLibrary
+	Discord   *discordgo.Session
+	Pool      *pgxpool.Pool
+	Context   = context.Background()
+	Validator = validator.New()
+	Logger    *zap.Logger
+	Config    *config.Config
+	MapMutex  *mapofmu.M[string]
+)
 
-	var level = zap.InfoLevel
-	if os.Getenv("DEBUG") == "true" {
-		level = zap.DebugLevel
-	}
-
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-		w,
-		level,
-	)
-
-	Logger = zap.New(core)
-
-	Logger.Info("Generating config")
-	genconfig.SampleFileName = configFile + ".sample"
-
-	genconfig.GenConfig(config.Config{})
-
-	Logger.Info("Loading config", zap.String("file", configFile))
-	cfg, err := os.ReadFile(configFile)
-
-	if err != nil {
-		Logger.Fatal("Could not read config file", zap.Error(err), zap.String("file", configFile))
-	}
-
-	err = yaml.Unmarshal(cfg, &Config)
-
-	if err != nil {
-		panic(err)
-	}
-
-	Logger.Info("Validating config")
-	err = Validator.Struct(Config)
-
-	if err != nil {
-		Logger.Fatal("Config validation failed", zap.Error(err))
-	}
-
-	Logger.Info("Connecting to service [postgres]")
-	Pool, err = pgxpool.New(Context, Config.PostgresURL)
-
-	if err != nil {
-		Logger.Fatal("Could not connect to postgres", zap.Error(err))
-	}
-
-	Logger.Info("Connecting to service [discord]")
-	Discord, err = discordgo.New("Bot " + Config.Token)
-
-	Discord.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers
-
-	if err != nil {
-		Logger.Fatal("Could not connect to discord", zap.Error(err))
-	}
-
-	err = Discord.Open()
-
-	if err != nil {
-		Logger.Fatal("Could not open discord connection", zap.Error(err))
-	}
-
-	Logger.Info("Connecting to service [badger]")
-	Badger, err = badger.Open(badger.DefaultOptions("/silverpelt/nightheart/badger").WithIndexCacheSize(100 << 20))
-	if err != nil {
-		Logger.Fatal("Could not open badger", zap.Error(err))
-	}
-}
+const (
+	configFile = "api-config.yaml"
+)

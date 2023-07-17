@@ -144,3 +144,9 @@ func (k KeyValue) String() string {
 func (k KeyValue) StringMD() string {
 	return "**" + k.Key + "**" + " => " + fmt.Sprint(k.Value)
 }
+
+// Core struct for defining a basic github event
+type RepoWrapper struct {
+	Repo   Repository `json:"repository"`
+	Action string     `json:"action"`
+}

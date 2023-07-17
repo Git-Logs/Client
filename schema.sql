@@ -31,3 +31,8 @@ CREATE TABLE event_modifiers (
     redirect_channel TEXT, -- Channel ID to redirect to, otherwise use default channel
     priority INTEGER NOT NULL -- Priority to apply the modifiers in, applied in descending order
 );
+
+create table webhook_logs (
+    log_id text primary key not null,
+    entries text[] not null default '{}'
+);
