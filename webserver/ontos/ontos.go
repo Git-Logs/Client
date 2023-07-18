@@ -182,9 +182,9 @@ func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 	err = state.Pool.QueryRow(state.Context, "SELECT id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoID, &repoName)
 
 	if err != nil {
-		state.Logger.Error("Invalid repository parameter", zap.Error(err), zap.String("repoName", rw.Repo.FullName), zap.String("webhookID", id))
+		state.Logger.Warn("This repository is not configured on git-logs, ignoring", zap.Error(err), zap.String("repoName", rw.Repo.FullName), zap.String("webhookID", id))
 		w.WriteHeader(http.StatusPartialContent)
-		w.Write([]byte("This request has an invalid repo parameter"))
+		w.Write([]byte("This repository is not configured on git-logs, ignoring"))
 		return
 	}
 
