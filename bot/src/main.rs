@@ -1,4 +1,4 @@
-use std::{time::Duration};
+use std::time::Duration;
 
 use log::{error, info};
 use poise::serenity_prelude::{
@@ -34,7 +34,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     // and forward the rest to the default handler
     match error {
         poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
-        poise::FrameworkError::Command { error, ctx } => {
+        poise::FrameworkError::Command { error, ctx, .. } => {
             error!("Error in command `{}`: {:?}", ctx.command().name, error,);
             ctx.say(format!(
                 "There was an error running this command: {}",
@@ -43,7 +43,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
             .await
             .unwrap();
         }
-        poise::FrameworkError::CommandCheckFailed { error, ctx } => {
+        poise::FrameworkError::CommandCheckFailed { error, ctx, .. } => {
             error!(
                 "[Possible] error in command `{}`: {:?}",
                 ctx.command().name,
@@ -128,7 +128,7 @@ async fn main() {
                 prefix: Some("git!".into()),
                 ..poise::PrefixFrameworkOptions::default()
             },
-            listener: |event, _ctx, user_data| Box::pin(event_listener(event, user_data)),
+            event_handler: |event, _ctx, user_data| Box::pin(event_listener(event, user_data)),
             commands: vec![
                 register(),
                 help::simplehelp(),

@@ -1,6 +1,6 @@
 use log::error;
 use poise::{serenity_prelude::{CreateMessage, ChannelId, CreateEmbed}, CreateReply};
-use rand::{distributions::{Alphanumeric, DistString}};
+use rand::distributions::{Alphanumeric, DistString};
 
 use crate::{Context, Error, config};
 
