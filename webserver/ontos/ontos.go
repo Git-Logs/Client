@@ -213,13 +213,13 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 
 You may also be looking for:
 
-- API (possibly unstable): /api/
-  - Counts: /counts/
+- API (possibly unstable): api/
+  - Counts: counts/
     - <server_count>,<user_count>,<shard_count>
 
-- Webhooks: /kittycat?id=ID
-  - Get Webhook Info: GET /kittycat?id=ID
-  - Handle Github Webhook: POST /kittycat?id=ID
+- Webhooks: kittycat?id=ID
+  - Get Webhook Info: GET kittycat?id=ID
+  - Handle Github Webhook: POST kittycat?id=ID
 `))
 }
 
@@ -234,7 +234,7 @@ func AuditEvent(w http.ResponseWriter, r *http.Request) {
 
 	var log []string
 
-	err := state.Pool.QueryRow(state.Context, "SELECT entries FROM "+state.Config.DBPrefix+"webhook_logs WHERE id = $1", logId).Scan(&log)
+	err := state.Pool.QueryRow(state.Context, "SELECT entries FROM "+state.Config.DBPrefix+"webhook_logs WHERE log_id = $1", logId).Scan(&log)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
