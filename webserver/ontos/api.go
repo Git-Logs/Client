@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"webserver/logos/events"
-	"webserver/state"
+
+	"github.com/git-logs/client/webserver/logos/events"
+	"github.com/git-logs/client/webserver/state"
 )
 
 // Precomputed values
@@ -20,7 +21,13 @@ func init() {
 	}
 }
 
+// This endpoint can only be used if the discordgo websocket is open
 func ApiStats(w http.ResponseWriter, r *http.Request) {
+	if state.Discord.State == nil {
+		w.Write([]byte("0,0,0"))
+		return
+	}
+
 	// Get guild count
 	guildCount := len(state.Discord.State.Guilds)
 	var userCount int

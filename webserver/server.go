@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 	"time"
-	"webserver/ontos"
-	"webserver/state"
+	"github.com/git-logs/client/webserver/ontos"
+	"github.com/git-logs/client/webserver/state"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

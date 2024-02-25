@@ -12,10 +12,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"webserver/logos/eventmodifiers"
-	"webserver/logos/events"
-	"webserver/pneuma"
-	"webserver/state"
+
+	"github.com/git-logs/client/webserver/logos/eventmodifiers"
+	"github.com/git-logs/client/webserver/logos/events"
+	"github.com/git-logs/client/webserver/pneuma"
+	"github.com/git-logs/client/webserver/state"
 
 	"github.com/infinitybotlist/eureka/crypto"
 	"go.uber.org/zap"
@@ -33,7 +34,7 @@ func GetWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := state.Pool.QueryRow(state.Context, "SELECT comment FROM webhooks WHERE id = $1", id).Scan(&comment)
+	err := state.Pool.QueryRow(state.Context, "SELECT comment FROM "+state.Config.DBPrefix+"webhooks WHERE id = $1", id).Scan(&comment)
 
 	if err != nil {
 		w.WriteHeader(404)
@@ -86,7 +87,7 @@ func GetWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		respStr.WriteString("\n\n")
 	}
 
-	repos, err := state.Pool.Query(state.Context, "SELECT id, repo_name, channel_id, created_at FROM repos WHERE webhook_id = $1", id)
+	repos, err := state.Pool.Query(state.Context, "SELECT id, repo_name, channel_id, created_at FROM "+state.Config.DBPrefix+"repos WHERE webhook_id = $1", id)
 
 	if err == nil {
 		respStr.WriteString("Repositories:\n\n")
@@ -130,7 +131,7 @@ func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := state.Pool.QueryRow(state.Context, "SELECT secret FROM webhooks WHERE id = $1", id).Scan(&secret)
+	err := state.Pool.QueryRow(state.Context, "SELECT secret FROM "+state.Config.DBPrefix+"webhooks WHERE id = $1", id).Scan(&secret)
 
 	if err != nil {
 		w.WriteHeader(404)
@@ -179,7 +180,7 @@ func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 	// Get repo_name from database
 	var repoName string
 	var repoID string
-	err = state.Pool.QueryRow(state.Context, "SELECT id, repo_name FROM repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoID, &repoName)
+	err = state.Pool.QueryRow(state.Context, "SELECT id, repo_name FROM "+state.Config.DBPrefix+"repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id).Scan(&repoID, &repoName)
 
 	if err != nil {
 		state.Logger.Warn("This repository is not configured on git-logs, ignoring", zap.Error(err), zap.String("repoName", rw.Repo.FullName), zap.String("webhookID", id))
@@ -233,7 +234,7 @@ func AuditEvent(w http.ResponseWriter, r *http.Request) {
 
 	var log []string
 
-	err := state.Pool.QueryRow(state.Context, "SELECT entries FROM webhook_logs WHERE id = $1", logId).Scan(&log)
+	err := state.Pool.QueryRow(state.Context, "SELECT entries FROM "+state.Config.DBPrefix+"webhook_logs WHERE id = $1", logId).Scan(&log)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

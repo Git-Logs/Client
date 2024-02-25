@@ -6,4 +6,5 @@ type Config struct {
 	PostgresURL string `yaml:"postgres_url" default:"postgresql:///github" comment:"Postgres URL" validate:"required"`
 	Port        string `yaml:"port" default:":19318" comment:"Port to run the server on" validate:"required"`
 	APIUrl      string `yaml:"api_url" default:"https://v2.gitlogs.xyz" comment:"URL of the API" validate:"required"`
+	DBPrefix    string `yaml:"db_prefix" default:"" comment:"If the table names should be prefixed with a specific marker value, use that name here"`
 }

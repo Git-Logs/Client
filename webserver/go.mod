@@ -1,4 +1,4 @@
-module webserver
+module github.com/git-logs/client/webserver
 
 go 1.19
 

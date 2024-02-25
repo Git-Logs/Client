@@ -1,7 +1,7 @@
 package eventmodifiers
 
 import (
-	"webserver/state"
+	"github.com/git-logs/client/webserver/state"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -37,7 +37,7 @@ func GetEventModifiers(
 	ghRepoId string,
 ) ([]*EventModifier, error) {
 	// Get all event_modifiers for webhook
-	rows, err := state.Pool.Query(state.Context, "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1 ORDER BY priority DESC", webhookId)
+	rows, err := state.Pool.Query(state.Context, "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM "+state.Config.DBPrefix+"event_modifiers WHERE webhook_id = $1 ORDER BY priority DESC", webhookId)
 
 	if err != nil {
 		return nil, err

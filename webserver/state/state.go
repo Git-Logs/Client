@@ -2,8 +2,8 @@ package state
 
 import (
 	"context"
-	"webserver/config"
-	"webserver/mapofmu"
+	"github.com/git-logs/client/webserver/config"
+	"github.com/git-logs/client/webserver/mapofmu"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-playground/validator/v10"
