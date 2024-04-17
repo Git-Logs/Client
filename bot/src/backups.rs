@@ -39,7 +39,7 @@ struct ProtocolCheck {
 }
 
 /// Backups the repositories of a webhook to a JSON file
-#[poise::command(slash_command, prefix_command, guild_only)]
+#[poise::command(slash_command, prefix_command, guild_only, required_permissions = "MANAGE_GUILD")]
 pub async fn backup(
     ctx: Context<'_>,
     #[description = "The webhook ID"] id: String,
