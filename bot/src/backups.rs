@@ -56,8 +56,7 @@ pub async fn backup(
 
     if guild.count.unwrap_or_default() == 0 {
         // If it doesn't, return a error
-        return Err("You don't have any webhooks in this guild! Use ``/gitlogs newhook`` (or ``%gitlogs newhook``) to create one".into());
-    }
+        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());    }
 
     // Check if the webhook exists
     let webhook = sqlx::query!(
@@ -69,8 +68,7 @@ pub async fn backup(
     .await?;
 
     if webhook.count.unwrap_or_default() == 0 {
-        return Err("That webhook doesn't exist! Use ``/gitlogs newhook`` (or ``%gitlogs newhook``) to create one".into());
-    }
+        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());    }
 
     let rows = sqlx::query!(
         "SELECT id, repo_name, channel_id FROM repos WHERE webhook_id = $1",
