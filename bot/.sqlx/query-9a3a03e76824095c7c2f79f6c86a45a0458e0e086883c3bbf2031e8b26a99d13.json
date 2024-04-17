@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event_modifiers (id, repo_id, events, blacklisted, whitelisted, redirect_channel, webhook_id, guild_id, priority) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray",
+        "Bool",
+        "Bool",
+        "Text",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9a3a03e76824095c7c2f79f6c86a45a0458e0e086883c3bbf2031e8b26a99d13"
+}

@@ -11,3 +11,5 @@ webserver/webserver
 **/*config.yaml.sample
 **/*-config.yaml.sample
 **/*.tar.gz
+dist
+config.yaml

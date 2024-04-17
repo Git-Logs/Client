@@ -1,5 +1,8 @@
-use poise::{CreateReply, serenity_prelude::{CreateAttachment, Attachment}};
-use serde::{Serialize, Deserialize};
+use poise::{
+    serenity_prelude::{Attachment, CreateAttachment},
+    CreateReply,
+};
+use serde::{Deserialize, Serialize};
 
 use crate::{Context, Error};
 
@@ -36,7 +39,7 @@ struct ProtocolCheck {
 }
 
 /// Backups the repositories of a webhook to a JSON file
-#[poise::command(category = "Backups", slash_command, prefix_command, guild_only, required_permissions = "MANAGE_GUILD")]
+#[poise::command(slash_command, prefix_command, guild_only)]
 pub async fn backup(
     ctx: Context<'_>,
     #[description = "The webhook ID"] id: String,
@@ -50,10 +53,10 @@ pub async fn backup(
     )
     .fetch_one(&data.pool)
     .await?;
-    
+
     if guild.count.unwrap_or_default() == 0 {
         // If it doesn't, return a error
-        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+        return Err("You don't have any webhooks in this guild! Use ``/gitlogs newhook`` (or ``%gitlogs newhook``) to create one".into());
     }
 
     // Check if the webhook exists
@@ -66,7 +69,7 @@ pub async fn backup(
     .await?;
 
     if webhook.count.unwrap_or_default() == 0 {
-        return Err("That webhook doesn't exist! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+        return Err("That webhook doesn't exist! Use ``/gitlogs newhook`` (or ``%gitlogs newhook``) to create one".into());
     }
 
     let rows = sqlx::query!(
@@ -88,8 +91,9 @@ pub async fn backup(
 
     // Fetch the event modifiers
     let rows = sqlx::query!(
-        "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1",
-        id
+        "SELECT id, repo_id, events, blacklisted, whitelisted, redirect_channel, priority FROM event_modifiers WHERE webhook_id = $1 AND guild_id = $2",
+        id,
+        ctx.guild_id().unwrap().to_string(),
     )
     .fetch_all(&data.pool)
     .await?;
@@ -114,11 +118,9 @@ pub async fn backup(
         repos,
     })?;
 
-    let msg = CreateReply::new()
-    .content("Here's your backup file!")
-    .attachment(
-        CreateAttachment::bytes(json.as_bytes(), id + ".glb")
-    );
+    let msg = CreateReply::default()
+        .content("Here's your backup file!")
+        .attachment(CreateAttachment::bytes(json.into_bytes(), id + ".glb"));
 
     ctx.send(msg).await?;
 
@@ -126,7 +128,7 @@ pub async fn backup(
 }
 
 /// Restore a created backup to a webhook
-#[poise::command(category = "Backups", slash_command, prefix_command, guild_only, required_permissions = "MANAGE_GUILD")]
+#[poise::command(category = "Backups", slash_command, prefix_command, guild_only)]
 pub async fn restore(
     ctx: Context<'_>,
     #[description = "The webhook ID to restore the backup to"] id: String,
@@ -141,7 +143,7 @@ pub async fn restore(
     )
     .fetch_one(&data.pool)
     .await?;
-    
+
     if guild.count.unwrap_or_default() == 0 {
         // If it doesn't, return a error
         return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());
@@ -165,15 +167,18 @@ pub async fn restore(
     let backup_protocol: ProtocolCheck = serde_json::from_slice(&backup_bytes)?;
 
     if backup_protocol.protocol.unwrap_or_default() != PROTOCOL {
-        return Err(
-            format!("This backup file is not compatible with this version of the bot. 
+        return Err(format!(
+            "This backup file is not compatible with this version of the bot. 
 
 Protocol version expected: {},
 Protocol version found: {}                
 
 Please contact our support team.
-            ", PROTOCOL, backup_protocol.protocol.unwrap_or_default()).into()
-        );
+            ",
+            PROTOCOL,
+            backup_protocol.protocol.unwrap_or_default()
+        )
+        .into());
     }
 
     let backup: Backup = serde_json::from_slice(&backup_bytes)?;
@@ -187,9 +192,10 @@ Please contact our support team.
     for repo in backup.repos {
         // Check that the repo exists
         let repo_exists = sqlx::query!(
-            "SELECT COUNT(1) FROM repos WHERE id = $1 AND webhook_id = $2",
+            "SELECT COUNT(1) FROM repos WHERE id = $1 AND webhook_id = $2 AND guild_id = $3",
             repo.repo_id,
-            id
+            id,
+            ctx.guild_id().unwrap().to_string(),
         )
         .fetch_one(&data.pool)
         .await?;
@@ -197,10 +203,11 @@ Please contact our support team.
         if repo_exists.count.unwrap_or_default() == 0 {
             // If it doesn't, create it
             sqlx::query!(
-                "INSERT INTO repos (id, repo_name, webhook_id, channel_id) VALUES ($1, $2, $3, $4)",
+                "INSERT INTO repos (id, repo_name, webhook_id, guild_id, channel_id) VALUES ($1, $2, $3, $4, $5)",
                 repo.repo_id,
                 repo.repo_name,
                 id,
+                ctx.guild_id().unwrap().to_string(),
                 repo.channel_id,
             )
             .execute(&data.pool)
@@ -210,11 +217,12 @@ Please contact our support team.
         } else {
             // If it does, update it
             sqlx::query!(
-                "UPDATE repos SET repo_name = $1, channel_id = $2 WHERE id = $3 AND webhook_id = $4",
+                "UPDATE repos SET repo_name = $1, channel_id = $2 WHERE id = $3 AND webhook_id = $4 AND guild_id = $5",
                 repo.repo_name,
                 repo.channel_id,
                 repo.repo_id,
-                id
+                id,
+                ctx.guild_id().unwrap().to_string(),
             )
             .execute(&data.pool)
             .await?;
@@ -224,11 +232,12 @@ Please contact our support team.
     }
 
     // Restore event modifiers
-    status.edit(
-        ctx,
-        CreateReply::new()
-        .content("Restoring event modifiers [2/2]...")
-    ).await?;
+    status
+        .edit(
+            ctx,
+            CreateReply::default().content("Restoring event modifiers [2/2]..."),
+        )
+        .await?;
 
     let mut inserted_modifiers = 0;
     let mut updated_modifiers = 0;
@@ -236,9 +245,10 @@ Please contact our support team.
     for event_modifier in backup.event_modifiers {
         // Check that the event modifier exists
         let event_modifier_exists = sqlx::query!(
-            "SELECT COUNT(1) FROM event_modifiers WHERE id = $1 AND webhook_id = $2",
+            "SELECT COUNT(1) FROM event_modifiers WHERE id = $1 AND webhook_id = $2 AND guild_id = $3",
             event_modifier.event_modifier_id,
-            id
+            id,
+            ctx.guild_id().unwrap().to_string(),
         )
         .fetch_one(&data.pool)
         .await?;
@@ -264,7 +274,7 @@ Please contact our support team.
         } else {
             // If it does, update it
             sqlx::query!(
-                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5, priority = $6 WHERE id = $7 AND webhook_id = $8",
+                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5, priority = $6 WHERE id = $7 AND webhook_id = $8 AND guild_id = $9",
                 event_modifier.repo_id,
                 &event_modifier.events,
                 event_modifier.blacklisted,
@@ -272,7 +282,8 @@ Please contact our support team.
                 event_modifier.redirect_channel,
                 event_modifier.priority,
                 event_modifier.event_modifier_id,
-                id
+                id,
+                ctx.guild_id().unwrap().to_string(),
             )
             .execute(&data.pool)
             .await?;
@@ -281,25 +292,25 @@ Please contact our support team.
         }
     }
 
-    status.edit(
-        ctx,
-        CreateReply::new()
-        .content(
-            format!(r#"
+    status
+        .edit(
+            ctx,
+            CreateReply::default().content(format!(
+                r#"
 **Summary**
 
 - **Inserted repos:** {inserted_repos}
 - **Updated repos:** {updated_repos}
 - **Inserted event modifiers:** {inserted_modifiers}
 - **Updated event modifiers:** {updated_modifiers}
-"#, 
-                inserted_repos = inserted_repos, 
+"#,
+                inserted_repos = inserted_repos,
                 updated_repos = updated_repos,
                 inserted_modifiers = inserted_modifiers,
                 updated_modifiers = updated_modifiers
-            )
-        )    
-    ).await?;
+            )),
+        )
+        .await?;
 
     Ok(())
 }

@@ -40,25 +40,21 @@ pub async fn list(
 
         match webhooks {
             Ok(webhooks) => {
-                let mut embeds = Vec::new();
-                    
+                let mut cr = CreateReply::default()
+                .content("Here are all the webhooks in this guild:");
+
                 let api_url = config::CONFIG.api_url[0].clone();
 
                 for webhook in webhooks {
                     let webhook_id = webhook.id;
-                    embeds.push(
+                    cr = cr.embed(
                         CreateEmbed::new()
                         .title(format!("Webhook \"{}\"", webhook.comment))
-                        .field("Webhook ID", &webhook_id, false)
+                        .field("Webhook ID", webhook_id.clone(), false)
                         .field("Hook URL (visit for hook info, add to Github to recieve events)", api_url.clone()+"/kittycat?id="+&webhook_id, false)
                         .field("Created at", webhook.created_at.to_string(), false)
                     );
                 };
-
-                let mut cr = CreateReply::default()
-                .content("Here are all the webhooks in this guild:");
-
-                cr.embeds = embeds;
 
                 ctx.send(cr).await?;
             },
@@ -117,7 +113,7 @@ pub async fn newhook(
     let webh_secret = Alphanumeric.sample_string(&mut rand::thread_rng(), 256);
 
     // Create a new dm channel with the user if not slash command
-    let dm_channel = ctx.author().create_dm_channel(&ctx).await;
+    let dm_channel = ctx.author().create_dm_channel(ctx.http()).await;
 
     let dm = match dm_channel {
         Ok(dm) => dm,
@@ -386,7 +382,7 @@ pub async fn resetsecret(
 
     // Try to DM the user
     // Create a new dm channel with the user if not slash command
-    let dm_channel = ctx.author().create_dm_channel(&ctx).await;
+    let dm_channel = ctx.author().create_dm_channel(ctx.http()).await;
 
     let dm = match dm_channel {
         Ok(dm) => dm,

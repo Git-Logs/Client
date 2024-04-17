@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE repos SET repo_name = $1, channel_id = $2 WHERE id = $3 AND webhook_id = $4 AND guild_id = $5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "14e16ece02711b6143e61e1025a768f9af2089e74d75b968db508f5a729b95f5"
+}

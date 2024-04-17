@@ -6,6 +6,7 @@ use poise::serenity_prelude::{
 };
 use sqlx::postgres::PgPoolOptions;
 use serenity::gateway::ActivityData;
+use std::sync::Arc;
 
 mod help;
 mod core;
@@ -33,7 +34,6 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     // They are many errors that can occur, so we only handle the ones we want to customize
     // and forward the rest to the default handler
     match error {
-        poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
         poise::FrameworkError::Command { error, ctx, .. } => {
             error!("Error in command `{}`: {:?}", ctx.command().name, error,);
             ctx.say(format!(
@@ -71,14 +71,16 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     }
 }
 
-async fn event_listener(event: &FullEvent, _user_data: &Data) -> Result<(), Error> {
+async fn event_listener<'a>(
+    ctx: poise::FrameworkContext<'a, Data, Error>,
+    event: &FullEvent,
+) -> Result<(), Error> {
     match event {
-        FullEvent::InteractionCreate { interaction, ctx: _ } => {
+        FullEvent::InteractionCreate { interaction } => {
             info!("Interaction received: {:?}", interaction.id());
         }
         FullEvent::Ready {
             data_about_bot,
-            ctx,
         } => {
             // Always wait a bit here for cache to finish up
             tokio::time::sleep(Duration::from_secs(2)).await;
@@ -89,7 +91,7 @@ async fn event_listener(event: &FullEvent, _user_data: &Data) -> Result<(), Erro
             );
 
             // Set activity
-            ctx.set_activity(Some(ActivityData::playing("git!help")));
+            ctx.serenity_context.set_activity(Some(ActivityData::playing("git!help")));
         }
         _ => {}
     }
@@ -117,9 +119,17 @@ async fn main() {
 
     let client_builder =
         prelude::ClientBuilder::new_with_http(
-            http, 
+            Arc::new(http), 
             prelude::GatewayIntents::MESSAGE_CONTENT | prelude::GatewayIntents::GUILD_MESSAGES | prelude::GatewayIntents::GUILDS
         );
+    
+    let data = Data {
+        pool: PgPoolOptions::new()
+            .max_connections(MAX_CONNECTIONS)
+            .connect(&config::CONFIG.database_url)
+            .await
+            .expect("Could not initialize connection"),
+    };    
 
     let framework = poise::Framework::new(
         poise::FrameworkOptions {
@@ -128,7 +138,7 @@ async fn main() {
                 prefix: Some("git!".into()),
                 ..poise::PrefixFrameworkOptions::default()
             },
-            event_handler: |event, _ctx, user_data| Box::pin(event_listener(event, user_data)),
+            event_handler: |ctx, event| Box::pin(event_listener(ctx, event)),
             commands: vec![
                 register(),
                 help::simplehelp(),
@@ -144,7 +154,7 @@ async fn main() {
                 backups::restore(),
                 eventmods::eventmod(),
             ],
-            /// This code is run before every command
+            // This code is run before every command
             pre_command: |ctx| {
                 Box::pin(async move {
                     info!(
@@ -155,7 +165,7 @@ async fn main() {
                     );
                 })
             },
-            /// This code is run after every command returns Ok
+            // This code is run after every command returns Ok
             post_command: |ctx| {
                 Box::pin(async move {
                     info!(
@@ -169,21 +179,11 @@ async fn main() {
             on_error: |error| Box::pin(on_error(error)),
             ..Default::default()
         },
-        move |_ctx, _ready, _framework| {
-            Box::pin(async move {
-                Ok(Data {
-                    pool: PgPoolOptions::new()
-                        .max_connections(MAX_CONNECTIONS)
-                        .connect(&config::CONFIG.database_url)
-                        .await
-                        .expect("Could not initialize connection"),
-                })
-            })
-        },
     );
 
     let mut client = client_builder
         .framework(framework)
+        .data(Arc::new(data))
         .await
         .expect("Error creating client");
 
