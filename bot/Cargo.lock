@@ -251,7 +251,7 @@ dependencies = [
 [[package]]
 name = "botox"
 version = "0.1.0"
-source = "git+https://github.com/infinitybotlist/botox?branch=main#064fc80fa7065422266b1d562587dac8164c4185"
+source = "git+https://github.com/infinitybotlist/botox?branch=main#b1d48a78d044d8eb1f9fa64a2961a5ddf9b5637a"
 dependencies = [
  "futures",
  "futures-util",
@@ -2039,7 +2039,7 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.12.1"
-source = "git+https://github.com/serenity-rs/serenity?branch=next#95479f3630945dc38a315fbac157bc5fef039065"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#39a057417a3ede7d30735ad5a0c9a03b9226727d"
 dependencies = [
  "arrayvec",
  "async-trait",
