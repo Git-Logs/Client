@@ -251,7 +251,7 @@ dependencies = [
 [[package]]
 name = "botox"
 version = "0.1.0"
-source = "git+https://github.com/infinitybotlist/botox?branch=main#064fc80fa7065422266b1d562587dac8164c4185"
+source = "git+https://github.com/infinitybotlist/botox?branch=main#ebc5dea74571d858f0b097df1a4e5f6a23c63cd1"
 dependencies = [
  "futures",
  "futures-util",
@@ -1515,7 +1515,7 @@ checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
 [[package]]
 name = "poise"
 version = "0.6.1"
-source = "git+https://github.com/serenity-rs/poise?branch=serenity-next#57abf8fd66e62df52674955752075272c1ce19cf"
+source = "git+https://github.com/serenity-rs/poise?branch=serenity-next#47a26bdee706d47ed3bda076abea1de4a0ec568f"
 dependencies = [
  "async-trait",
  "derivative",
@@ -1526,12 +1526,13 @@ dependencies = [
  "serenity",
  "tokio",
  "tracing",
+ "trim-in-place",
 ]
 
 [[package]]
 name = "poise_macros"
 version = "0.6.1"
-source = "git+https://github.com/serenity-rs/poise?branch=serenity-next#57abf8fd66e62df52674955752075272c1ce19cf"
+source = "git+https://github.com/serenity-rs/poise?branch=serenity-next#47a26bdee706d47ed3bda076abea1de4a0ec568f"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -2039,7 +2040,7 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.12.1"
-source = "git+https://github.com/serenity-rs/serenity?branch=next#95479f3630945dc38a315fbac157bc5fef039065"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#5bf2188a4fded1a04f1126e444e586e6aef47064"
 dependencies = [
  "arrayvec",
  "async-trait",
@@ -2749,6 +2750,12 @@ checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
 ]
+
+[[package]]
+name = "trim-in-place"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "343e926fc669bc8cde4fa3129ab681c63671bae288b1f1081ceee6d9d37904fc"
 
 [[package]]
 name = "triomphe"
