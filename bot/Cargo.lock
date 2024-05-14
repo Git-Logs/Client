@@ -213,14 +213,15 @@ dependencies = [
 
 [[package]]
 name = "bool_to_bitflags"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f36fc6ed2e593856869a03f5390020adfd8fc64187dc2d17763bbe041fe59b9d"
+checksum = "242af031566ece792a0e2a72b0c1dbeba246620bb1023c14446375b24154b6e0"
 dependencies = [
  "darling",
  "proc-macro2",
  "quote",
  "syn 2.0.59",
+ "to-arraystring",
 ]
 
 [[package]]
@@ -2039,11 +2040,11 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.12.1"
-source = "git+https://github.com/serenity-rs/serenity?branch=next#95479f3630945dc38a315fbac157bc5fef039065"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#52f28225188d72fe78ffeb4d6ea80b61f508bcd3"
 dependencies = [
  "arrayvec",
  "async-trait",
- "base64 0.21.7",
+ "base64 0.22.0",
  "bitflags 2.5.0",
  "bool_to_bitflags",
  "bytes",
@@ -2589,9 +2590,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "to-arraystring"
-version = "0.1.1"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebb6a403b7fb46904d796b3b2acfa31885440adc51925e6fc19ac28cf4afa661"
+checksum = "340b46242bcb0b5c24768ca5901c51f0b3439ed88d04e8870f83826b960760b4"
 dependencies = [
  "arrayvec",
  "itoa",
