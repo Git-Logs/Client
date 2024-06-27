@@ -120,7 +120,7 @@ async fn main() {
     let client_builder =
         prelude::ClientBuilder::new_with_http(
             Arc::new(http), 
-            prelude::GatewayIntents::MESSAGE_CONTENT | prelude::GatewayIntents::GUILD_MESSAGES | prelude::GatewayIntents::GUILDS
+            prelude::GatewayIntents::GUILD_MESSAGES | prelude::GatewayIntents::GUILDS
         );
     
     let data = Data {
