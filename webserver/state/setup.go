@@ -178,7 +178,7 @@ func ApplyMigrations() {
 		ALTER TABLE `+TableEventModifiers+` ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
 		ALTER TABLE `+TableEventModifiers+` ALTER COLUMN last_updated_by DROP DEFAULT;
 
-		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE;
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES `+TableWebhooks+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
 		ALTER TABLE `+TableWebhookLogs+` ALTER COLUMN created_by DROP DEFAULT;
@@ -189,5 +189,11 @@ func ApplyMigrations() {
 
 	if err != nil {
 		Logger.Fatal("Could not apply migrations", zap.Error(err))
+	}
+
+	err = tx.Commit(Context)
+
+	if err != nil {
+		Logger.Fatal("Could not commit migration transaction", zap.Error(err))
 	}
 }
