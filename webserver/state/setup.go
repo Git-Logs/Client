@@ -105,4 +105,6 @@ func PrepareForEmbedding() {
 	for _, table := range TableList {
 		*table = Config.GetTable(*table)
 	}
+
+	IsEmbedded = true
 }

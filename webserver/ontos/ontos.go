@@ -220,7 +220,10 @@ You may also be looking for:
 - Webhooks: kittycat?id=ID
   - Get Webhook Info: GET kittycat?id=ID
   - Handle Github Webhook: POST kittycat?id=ID
+  
 `))
+
+	w.Write([]byte(`[is_embedded]: ` + strconv.FormatBool(state.IsEmbedded) + "\n"))
 }
 
 func AuditEvent(w http.ResponseWriter, r *http.Request) {
