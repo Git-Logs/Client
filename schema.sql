@@ -44,6 +44,7 @@ CREATE TABLE event_modifiers (
 
 create table webhook_logs (
     log_id text primary key not null,
+    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
     webhook_id text not null references webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE,
     entries text[] not null default '{}',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

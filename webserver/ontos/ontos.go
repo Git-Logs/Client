@@ -139,6 +139,15 @@ func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var guildId string
+	err = state.Pool.QueryRow(state.Context, "SELECT guild_id FROM "+state.TableWebhooks+" WHERE id = $1", id).Scan(&guildId)
+
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("This request has an invalid id parameter"))
+		return
+	}
+
 	var bodyBytes []byte
 
 	defer r.Body.Close()
@@ -203,6 +212,7 @@ func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		logId,
 		header,
 		id,
+		guildId,
 	)
 
 }

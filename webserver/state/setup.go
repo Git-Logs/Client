@@ -148,7 +148,14 @@ func ApplyMigrations() {
 		Logger.Fatal("Could not check for webhook_id column", zap.Error(err))
 	}
 
-	if countOfWebhookId == 0 {
+	var countOfGuildId int64
+	err = tx.QueryRow(Context, "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = $1 AND column_name = 'guild_id'", TableWebhookLogs).Scan(&countOfGuildId)
+
+	if err != nil {
+		Logger.Fatal("Could not check for guild_id column", zap.Error(err))
+	}
+
+	if countOfGuildId == 0 || countOfWebhookId == 0 {
 		_, err = tx.Exec(Context, `
 			DELETE FROM `+TableWebhookLogs+`
 		`)
@@ -179,6 +186,7 @@ func ApplyMigrations() {
 		ALTER TABLE `+TableEventModifiers+` ALTER COLUMN last_updated_by DROP DEFAULT;
 
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES `+TableWebhooks+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS guild_id TEXT NOT NULL REFERENCES `+TableGuilds+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
 		ALTER TABLE `+TableWebhookLogs+` ALTER COLUMN created_by DROP DEFAULT;
