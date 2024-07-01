@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO repos (id, repo_name, webhook_id, guild_id, channel_id, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "381b4e99c16253a7775375a6a71bd274bca6cfd53a0ac939e48df1b32dbe6ec1"
+}

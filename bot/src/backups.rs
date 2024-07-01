@@ -53,7 +53,7 @@ pub async fn backup(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)
@@ -143,7 +143,7 @@ pub async fn restore(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)

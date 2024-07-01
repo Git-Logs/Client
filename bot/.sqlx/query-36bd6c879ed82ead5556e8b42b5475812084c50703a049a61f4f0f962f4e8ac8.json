@@ -1,11 +1,10 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO repos (id, webhook_id, repo_name, channel_id, guild_id) VALUES ($1, $2, $3, $4, $5)",
+  "query": "UPDATE webhooks SET secret = $1, last_updated_by = $2 WHERE id = $3 AND guild_id = $4",
   "describe": {
     "columns": [],
     "parameters": {
       "Left": [
-        "Text",
         "Text",
         "Text",
         "Text",
@@ -14,5 +13,5 @@
     },
     "nullable": []
   },
-  "hash": "f7b3cea367d806f26ef365cd7cfae174fc9368fccf29d80335a50f465adfc558"
+  "hash": "36bd6c879ed82ead5556e8b42b5475812084c50703a049a61f4f0f962f4e8ac8"
 }

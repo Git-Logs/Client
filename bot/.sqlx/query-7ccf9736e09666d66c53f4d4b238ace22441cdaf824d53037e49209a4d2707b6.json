@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+  "query": "SELECT COUNT(1) FROM guilds WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -18,5 +18,5 @@
       null
     ]
   },
-  "hash": "9850f555c36573872c55e07720103fff47f4ba029d4fda2cbe0a92ab37804e10"
+  "hash": "7ccf9736e09666d66c53f4d4b238ace22441cdaf824d53037e49209a4d2707b6"
 }

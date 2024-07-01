@@ -1,11 +1,11 @@
 CREATE TABLE guilds (
-    guild_id TEXT PRIMARY KEY NOT NULL,
+    id TEXT PRIMARY KEY NOT NULL,
     banned BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE webhooks (
     id TEXT PRIMARY KEY NOT NULL,
-    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    guild_id TEXT NOT NULL REFERENCES guilds(id) ON DELETE CASCADE ON UPDATE CASCADE,
     comment TEXT NOT NULL, -- A comment to help identify the webhook
     secret TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -16,7 +16,7 @@ CREATE TABLE webhooks (
 
 CREATE TABLE repos (
     id TEXT PRIMARY KEY NOT NULL,
-    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    guild_id TEXT NOT NULL REFERENCES guilds(id) ON DELETE CASCADE ON UPDATE CASCADE,
     webhook_id TEXT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE ON UPDATE CASCADE,
     repo_name TEXT NOT NULL,
     channel_id TEXT NOT NULL, -- Channel ID to post to
@@ -28,7 +28,7 @@ CREATE TABLE repos (
 
 CREATE TABLE event_modifiers (
     id TEXT PRIMARY KEY NOT NULL,
-    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    guild_id TEXT NOT NULL REFERENCES guilds(id) ON DELETE CASCADE ON UPDATE CASCADE,
     webhook_id TEXT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE ON UPDATE CASCADE, -- Webhook to apply to
     repo_id TEXT REFERENCES repos(id) ON DELETE CASCADE ON UPDATE CASCADE, -- Optional, if not set, will assume all repos
     events TEXT[] NOT NULL DEFAULT '{}', -- Events to capture in this modifier
@@ -44,7 +44,7 @@ CREATE TABLE event_modifiers (
 
 create table webhook_logs (
     log_id text primary key not null,
-    guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    guild_id TEXT NOT NULL REFERENCES guilds(id) ON DELETE CASCADE ON UPDATE CASCADE,
     webhook_id text not null references webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE,
     entries text[] not null default '{}'
 );

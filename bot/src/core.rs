@@ -13,7 +13,7 @@ pub async fn list(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)
@@ -22,7 +22,7 @@ pub async fn list(
     if guild.count.unwrap_or_default() == 0 {
         // If it doesn't, return an error
         sqlx::query!(
-            "INSERT INTO guilds (guild_id) VALUES ($1)",
+            "INSERT INTO guilds (id) VALUES ($1)",
             ctx.guild_id().unwrap().to_string()
         )
         .execute(&data.pool)
@@ -78,7 +78,7 @@ pub async fn newhook(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)
@@ -87,7 +87,7 @@ pub async fn newhook(
     if guild.count.unwrap_or_default() == 0 {
         // If it doesn't, create it
         sqlx::query!(
-            "INSERT INTO guilds (guild_id) VALUES ($1)",
+            "INSERT INTO guilds (id) VALUES ($1)",
             ctx.guild_id().unwrap().to_string()
         )
         .execute(&data.pool)
@@ -181,7 +181,7 @@ pub async fn newrepo(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)
@@ -267,7 +267,7 @@ pub async fn delhook(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)
@@ -359,7 +359,7 @@ pub async fn resetsecret(
 
     // Check if the guild exists on our DB
     let guild = sqlx::query!(
-        "SELECT COUNT(1) FROM guilds WHERE guild_id = $1",
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
         ctx.guild_id().unwrap().to_string()
     )
     .fetch_one(&data.pool)
