@@ -127,10 +127,6 @@ func ApplyMigrations() {
 		event_modifiers.last_updated_by TEXT NOT NULL [set unfilled to '']
 
 		webhook_logs.webhook_id text not null references webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE [drop all if webhook_id unset]
-		webhook_logs.created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-		webhook_logs.created_by TEXT NOT NULL [set unfilled to '']
-		webhook_logs.last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-		webhook_logs.last_updated_by TEXT NOT NULL [set unfilled to '']
 	*/
 
 	tx, err := Pool.Begin(Context)
@@ -187,12 +183,6 @@ func ApplyMigrations() {
 
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES `+TableWebhooks+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS guild_id TEXT NOT NULL REFERENCES `+TableGuilds+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
-		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE `+TableWebhookLogs+` ALTER COLUMN created_by DROP DEFAULT;
-		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE `+TableWebhookLogs+` ALTER COLUMN last_updated_by DROP DEFAULT;
 	`)
 
 	if err != nil {
