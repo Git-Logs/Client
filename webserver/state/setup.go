@@ -142,7 +142,7 @@ func ApplyMigrations() {
 	defer tx.Rollback(Context)
 
 	var countOfWebhookId int64
-	err = tx.QueryRow(Context, "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'webhook_logs' AND column_name = 'webhook_id'").Scan(&countOfWebhookId)
+	err = tx.QueryRow(Context, "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = $1 AND column_name = 'webhook_id'", TableWebhookLogs).Scan(&countOfWebhookId)
 
 	if err != nil {
 		Logger.Fatal("Could not check for webhook_id column", zap.Error(err))
@@ -150,7 +150,7 @@ func ApplyMigrations() {
 
 	if countOfWebhookId == 0 {
 		_, err = tx.Exec(Context, `
-			DELETE FROM webhook_logs
+			DELETE FROM `+TableWebhookLogs+`
 		`)
 
 		if err != nil {
@@ -159,32 +159,32 @@ func ApplyMigrations() {
 	}
 
 	_, err = tx.Exec(Context, `
-		ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE webhooks ALTER COLUMN created_by DROP DEFAULT;
-		ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE webhooks ALTER COLUMN last_updated_by DROP DEFAULT;
+		ALTER TABLE `+TableWebhooks+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableWebhooks+` ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE `+TableWebhooks+` ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE `+TableWebhooks+` ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableWebhooks+` ALTER COLUMN last_updated_by DROP DEFAULT;
 
-		ALTER TABLE repos ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE repos ALTER COLUMN created_by DROP DEFAULT;
-		ALTER TABLE repos ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE repos ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE repos ALTER COLUMN last_updated_by DROP DEFAULT;
+		ALTER TABLE `+TableRepos+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableRepos+` ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE `+TableRepos+` ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE `+TableRepos+` ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableRepos+` ALTER COLUMN last_updated_by DROP DEFAULT;
 
-		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE event_modifiers ALTER COLUMN created_by DROP DEFAULT;
-		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE event_modifiers ALTER COLUMN last_updated_by DROP DEFAULT;
+		ALTER TABLE `+TableEventModifiers+` ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE `+TableEventModifiers+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableEventModifiers+` ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE `+TableEventModifiers+` ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE `+TableEventModifiers+` ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableEventModifiers+` ALTER COLUMN last_updated_by DROP DEFAULT;
 
-		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE;
-		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE webhook_logs ALTER COLUMN created_by DROP DEFAULT;
-		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
-		ALTER TABLE webhook_logs ALTER COLUMN last_updated_by DROP DEFAULT;
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE;
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableWebhookLogs+` ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '0';
+		ALTER TABLE `+TableWebhookLogs+` ALTER COLUMN last_updated_by DROP DEFAULT;
 	`)
 
 	if err != nil {
