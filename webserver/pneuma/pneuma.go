@@ -17,7 +17,7 @@ func updateLogEntries(logId string, entries ...any) error {
 	// Check for log_id in database
 	var count int
 
-	err := state.Pool.QueryRow(state.Context, "SELECT COUNT(*) FROM "+state.Config.DBPrefix+"webhook_logs WHERE log_id = $1", logId).Scan(&count)
+	err := state.Pool.QueryRow(state.Context, "SELECT COUNT(*) FROM "+state.TableWebhookLogs+" WHERE log_id = $1", logId).Scan(&count)
 
 	if err != nil {
 		return err
@@ -27,11 +27,11 @@ func updateLogEntries(logId string, entries ...any) error {
 
 	if count == 0 {
 		// Insert new log_id
-		_, err = state.Pool.Exec(state.Context, "INSERT INTO "+state.Config.DBPrefix+"webhook_logs (log_id, entries) VALUES ($1, $2)", logId, []string{entry})
+		_, err = state.Pool.Exec(state.Context, "INSERT INTO "+state.TableWebhookLogs+" (log_id, entries) VALUES ($1, $2)", logId, []string{entry})
 		return err
 	}
 
-	_, err = state.Pool.Exec(state.Context, "UPDATE "+state.Config.DBPrefix+"webhook_logs SET entries = array_append(entries, $1) WHERE log_id = $2", entry, logId)
+	_, err = state.Pool.Exec(state.Context, "UPDATE "+state.TableWebhookLogs+" SET entries = array_append(entries, $1) WHERE log_id = $2", entry, logId)
 	return err
 }
 
@@ -78,7 +78,7 @@ func HandleEvents(
 		channelIds = []string{modres.ChannelOverride}
 	} else {
 		// Get channel ID from database
-		rows, err := state.Pool.Query(state.Context, "SELECT channel_id FROM "+state.Config.DBPrefix+"repos WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id)
+		rows, err := state.Pool.Query(state.Context, "SELECT channel_id FROM "+state.TableRepos+" WHERE repo_name = $1 AND webhook_id = $2", strings.ToLower(rw.Repo.FullName), id)
 
 		if err != nil {
 			updateLogEntries(logId, "Channel id fetch error: acl="+modres.ACLFail, "error="+err.Error())

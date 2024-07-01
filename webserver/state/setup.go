@@ -2,6 +2,7 @@ package state
 
 import (
 	"os"
+
 	"github.com/git-logs/client/webserver/config"
 	"github.com/git-logs/client/webserver/mapofmu"
 
@@ -11,6 +12,22 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	TableEventModifiers = "event_modifiers"
+	TableRepos          = "repos"
+	TableGuilds         = "guilds"
+	TableWebhooks       = "webhooks"
+	TableWebhookLogs    = "webhook_logs"
+
+	TableList = []*string{
+		&TableEventModifiers,
+		&TableRepos,
+		&TableGuilds,
+		&TableWebhooks,
+		&TableWebhookLogs,
+	}
 )
 
 func Setup() {
@@ -77,5 +94,15 @@ func Setup() {
 
 	if err != nil {
 		Logger.Fatal("Could not open discord connection", zap.Error(err))
+	}
+}
+
+// Must be called when embedding, PrepareForEmbedding creates the table names from config and may do other setup
+// in the future
+//
+// Note that config.GetTable must be set before calling this function
+func PrepareForEmbedding() {
+	for _, table := range TableList {
+		*table = Config.GetTable(*table)
 	}
 }
