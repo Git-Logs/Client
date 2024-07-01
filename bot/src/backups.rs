@@ -39,7 +39,12 @@ struct ProtocolCheck {
 }
 
 /// Backups the repositories of a webhook to a JSON file
-#[poise::command(slash_command, prefix_command, guild_only, required_permissions = "MANAGE_GUILD")]
+#[poise::command(
+    slash_command,
+    prefix_command,
+    guild_only,
+    required_permissions = "MANAGE_GUILD"
+)]
 pub async fn backup(
     ctx: Context<'_>,
     #[description = "The webhook ID"] id: String,
@@ -56,7 +61,8 @@ pub async fn backup(
 
     if guild.count.unwrap_or_default() == 0 {
         // If it doesn't, return a error
-        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());    }
+        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+    }
 
     // Check if the webhook exists
     let webhook = sqlx::query!(
@@ -68,7 +74,8 @@ pub async fn backup(
     .await?;
 
     if webhook.count.unwrap_or_default() == 0 {
-        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());    }
+        return Err("You don't have any webhooks in this guild! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+    }
 
     let rows = sqlx::query!(
         "SELECT id, repo_name, channel_id FROM repos WHERE webhook_id = $1",
@@ -157,7 +164,10 @@ pub async fn restore(
     .await?;
 
     if webhook.count.unwrap_or_default() == 0 {
-        return Err("That webhook doesn't exist! Use ``/newhook`` (or ``git!newhook``) to create one".into());
+        return Err(
+            "That webhook doesn't exist! Use ``/newhook`` (or ``git!newhook``) to create one"
+                .into(),
+        );
     }
 
     let backup_bytes = file.download().await?;
@@ -201,12 +211,14 @@ Please contact our support team.
         if repo_exists.count.unwrap_or_default() == 0 {
             // If it doesn't, create it
             sqlx::query!(
-                "INSERT INTO repos (id, repo_name, webhook_id, guild_id, channel_id) VALUES ($1, $2, $3, $4, $5)",
+                "INSERT INTO repos (id, repo_name, webhook_id, guild_id, channel_id, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 repo.repo_id,
                 repo.repo_name,
                 id,
                 ctx.guild_id().unwrap().to_string(),
                 repo.channel_id,
+                ctx.author().id.to_string(),
+                ctx.author().id.to_string(),
             )
             .execute(&data.pool)
             .await?;
@@ -254,7 +266,7 @@ Please contact our support team.
         if event_modifier_exists.count.unwrap_or_default() == 0 {
             // If it doesn't, create it
             sqlx::query!(
-                "INSERT INTO event_modifiers (id, repo_id, events, blacklisted, whitelisted, redirect_channel, webhook_id, guild_id, priority) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+                "INSERT INTO event_modifiers (id, repo_id, events, blacklisted, whitelisted, redirect_channel, webhook_id, guild_id, priority, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
                 event_modifier.event_modifier_id,
                 event_modifier.repo_id,
                 &event_modifier.events,
@@ -264,6 +276,8 @@ Please contact our support team.
                 id,
                 ctx.guild_id().unwrap().to_string(),
                 event_modifier.priority,
+                ctx.author().id.to_string(),
+                ctx.author().id.to_string(),
             )
             .execute(&data.pool)
             .await?;
@@ -272,13 +286,14 @@ Please contact our support team.
         } else {
             // If it does, update it
             sqlx::query!(
-                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5, priority = $6 WHERE id = $7 AND webhook_id = $8 AND guild_id = $9",
+                "UPDATE event_modifiers SET repo_id = $1, events = $2, blacklisted = $3, whitelisted = $4, redirect_channel = $5, priority = $6, last_updated_by = $7 WHERE id = $8 AND webhook_id = $9 AND guild_id = $10",
                 event_modifier.repo_id,
                 &event_modifier.events,
                 event_modifier.blacklisted,
                 event_modifier.whitelisted,
                 event_modifier.redirect_channel,
                 event_modifier.priority,
+                ctx.author().id.to_string(),
                 event_modifier.event_modifier_id,
                 id,
                 ctx.guild_id().unwrap().to_string(),

@@ -124,11 +124,13 @@ pub async fn newhook(
     };
 
     sqlx::query!(
-        "INSERT INTO webhooks (id, guild_id, comment, secret) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO webhooks (id, guild_id, comment, secret, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6)",
         id,
         ctx.guild_id().unwrap().to_string(),
         comment,
-        webh_secret
+        webh_secret,
+        ctx.author().id.to_string(),
+        ctx.author().id.to_string(),
     )
     .execute(&data.pool)
     .await?;
@@ -232,12 +234,14 @@ pub async fn newrepo(
             let id = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
 
             sqlx::query!(
-                "INSERT INTO repos (id, webhook_id, repo_name, channel_id, guild_id) VALUES ($1, $2, $3, $4, $5)",
+                "INSERT INTO repos (id, webhook_id, repo_name, channel_id, guild_id, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 id,
                 webhook_id,
                 &repo_name,
                 channel.to_string(),
-                ctx.guild_id().unwrap().to_string()
+                ctx.guild_id().unwrap().to_string(),
+                ctx.author().id.to_string(),
+                ctx.author().id.to_string(),
             )
             .execute(&data.pool)
             .await?;
@@ -331,8 +335,9 @@ pub async fn setrepochannel(
     }
 
     sqlx::query!(
-        "UPDATE repos SET channel_id = $1 WHERE id = $2 AND guild_id = $3",
+        "UPDATE repos SET channel_id = $1, last_updated_by = $2 WHERE id = $3 AND guild_id = $4",
         channel.to_string(),
+        ctx.author().id.to_string(),
         id,
         ctx.guild_id().unwrap().to_string()
     )
@@ -393,8 +398,9 @@ pub async fn resetsecret(
     };
 
     sqlx::query!(
-        "UPDATE webhooks SET secret = $1 WHERE id = $2 AND guild_id = $3",
+        "UPDATE webhooks SET secret = $1, last_updated_by = $2 WHERE id = $3 AND guild_id = $4",
         webh_secret,
+        ctx.author().id.to_string(),
         id,
         ctx.guild_id().unwrap().to_string()
     )
