@@ -46,9 +46,5 @@ create table webhook_logs (
     log_id text primary key not null,
     guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
     webhook_id text not null references webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    entries text[] not null default '{}',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by TEXT NOT NULL,
-    last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_updated_by TEXT NOT NULL
+    entries text[] not null default '{}'
 );
