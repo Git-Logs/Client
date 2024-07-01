@@ -95,6 +95,8 @@ func Setup() {
 	if err != nil {
 		Logger.Fatal("Could not open discord connection", zap.Error(err))
 	}
+
+	ApplyMigrations()
 }
 
 // Must be called when embedding, PrepareForEmbedding creates the table names from config and may do other setup
@@ -107,4 +109,85 @@ func PrepareForEmbedding() {
 	}
 
 	IsEmbedded = true
+}
+
+func ApplyMigrations() {
+	/*
+		webhooks.created_by TEXT NOT NULL [set unfilled to '']
+		webhooks.last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		webhooks.last_updated_by TEXT NOT NULL [set unfilled to '']
+
+		repos.created_by TEXT NOT NULL [set unfilled to '']
+		repos.last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		repos.last_updated_by TEXT NOT NULL [set unfilled to '']
+
+		event_modifiers.created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		event_modifiers.created_by TEXT NOT NULL [set unfilled to '']
+		event_modifiers.last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		event_modifiers.last_updated_by TEXT NOT NULL [set unfilled to '']
+
+		webhook_logs.webhook_id text not null references webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE [drop all if webhook_id unset]
+		webhook_logs.created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		webhook_logs.created_by TEXT NOT NULL [set unfilled to '']
+		webhook_logs.last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		webhook_logs.last_updated_by TEXT NOT NULL [set unfilled to '']
+	*/
+
+	tx, err := Pool.Begin(Context)
+
+	if err != nil {
+		Logger.Fatal("Could not start migration transaction", zap.Error(err))
+	}
+
+	defer tx.Rollback(Context)
+
+	var countOfWebhookId int64
+	err = tx.QueryRow(Context, "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'webhook_logs' AND column_name = 'webhook_id'").Scan(&countOfWebhookId)
+
+	if err != nil {
+		Logger.Fatal("Could not check for webhook_id column", zap.Error(err))
+	}
+
+	if countOfWebhookId == 0 {
+		_, err = tx.Exec(Context, `
+			DELETE FROM webhook_logs
+		`)
+
+		if err != nil {
+			Logger.Fatal("Could not delete webhook_logs", zap.Error(err))
+		}
+	}
+
+	_, err = tx.Exec(Context, `
+		ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE webhooks ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE webhooks ALTER COLUMN last_updated_by DROP DEFAULT;
+
+		ALTER TABLE repos ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE repos ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE repos ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE repos ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE repos ALTER COLUMN last_updated_by DROP DEFAULT;
+
+		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE event_modifiers ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE event_modifiers ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE event_modifiers ALTER COLUMN last_updated_by DROP DEFAULT;
+
+		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE;
+		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE webhook_logs ALTER COLUMN created_by DROP DEFAULT;
+		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+		ALTER TABLE webhook_logs ADD COLUMN IF NOT EXISTS last_updated_by TEXT NOT NULL DEFAULT '';
+		ALTER TABLE webhook_logs ALTER COLUMN last_updated_by DROP DEFAULT;
+	`)
+
+	if err != nil {
+		Logger.Fatal("Could not apply migrations", zap.Error(err))
+	}
 }

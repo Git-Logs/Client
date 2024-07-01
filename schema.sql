@@ -8,7 +8,10 @@ CREATE TABLE webhooks (
     guild_id TEXT NOT NULL REFERENCES guilds(guild_id) ON DELETE CASCADE ON UPDATE CASCADE,
     comment TEXT NOT NULL, -- A comment to help identify the webhook
     secret TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_updated_by TEXT NOT NULL
 );
 
 CREATE TABLE repos (
@@ -17,7 +20,10 @@ CREATE TABLE repos (
     webhook_id TEXT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE ON UPDATE CASCADE,
     repo_name TEXT NOT NULL,
     channel_id TEXT NOT NULL, -- Channel ID to post to
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_updated_by TEXT NOT NULL
 );
 
 CREATE TABLE event_modifiers (
@@ -29,10 +35,19 @@ CREATE TABLE event_modifiers (
     blacklisted boolean not null default false, -- Whether or not these events are blacklisted or not
     whitelisted boolean not null default false, -- Whether or not only these events can be sent
     redirect_channel TEXT, -- Channel ID to redirect to, otherwise use default channel
-    priority INTEGER NOT NULL -- Priority to apply the modifiers in, applied in descending order
+    priority INTEGER NOT NULL, -- Priority to apply the modifiers in, applied in descending order
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_updated_by TEXT NOT NULL
 );
 
 create table webhook_logs (
     log_id text primary key not null,
-    entries text[] not null default '{}'
+    webhook_id text not null references webhooks (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    entries text[] not null default '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    last_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_updated_by TEXT NOT NULL
 );
