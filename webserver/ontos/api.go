@@ -23,6 +23,7 @@ func init() {
 
 // This endpoint can only be used if the discordgo websocket is open
 func ApiStats(w http.ResponseWriter, r *http.Request) {
+	// TODO: Discord.State is always nil now, try adding a different way of calculating this
 	if state.Discord.State == nil {
 		w.Write([]byte("0,0,0"))
 		return

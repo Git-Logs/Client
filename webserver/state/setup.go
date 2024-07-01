@@ -84,14 +84,6 @@ func Setup() {
 	Logger.Info("Connecting to service [discord]")
 	Discord, err = discordgo.New("Bot " + Config.Token)
 
-	Discord.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMembers
-
-	if err != nil {
-		Logger.Fatal("Could not connect to discord", zap.Error(err))
-	}
-
-	err = Discord.Open()
-
 	if err != nil {
 		Logger.Fatal("Could not open discord connection", zap.Error(err))
 	}
