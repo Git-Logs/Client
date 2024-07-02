@@ -88,7 +88,11 @@ func Setup() {
 		Logger.Fatal("Could not open discord connection", zap.Error(err))
 	}
 
-	ApplyMigrations()
+	Logger.Info("Connected to all services successfully")
+
+	if v := os.Getenv("APPLY_MIGRATIONS"); v == "true" {
+		ApplyMigrations()
+	}
 }
 
 // Must be called when embedding, PrepareForEmbedding creates the table names from config and may do other setup
