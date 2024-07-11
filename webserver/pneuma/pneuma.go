@@ -78,6 +78,11 @@ func applyEmbedLimits(e *discordgo.MessageEmbed) *discordgo.MessageEmbed {
 
 		*totalChars += charLimit
 
+		// Avoid panic as go doesn't handle slices out of bounds
+		if len(s) <= charLimit {
+			return s
+		}
+
 		return s[:charLimit]
 	}
 
