@@ -1,6 +1,6 @@
 module github.com/git-logs/client/webserver
 
-go 1.19
+go 1.21
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1

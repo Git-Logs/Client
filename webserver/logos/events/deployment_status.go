@@ -11,6 +11,7 @@ type DeploymentStatusEvent struct {
 	Repo             Repository `json:"repository"`
 	Sender           User       `json:"sender"`
 	DeploymentStatus struct {
+		State          string    `json:"state"`
 		Creator        User      `json:"creator"`
 		CreatedAt      time.Time `json:"created_at"`
 		Description    string    `json:"description"`
@@ -25,20 +26,38 @@ type DeploymentStatusEvent struct {
 	}
 }
 
-func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
+func deploymentStatusFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh DeploymentStatusEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
+	var emoji string
+
+	switch gh.DeploymentStatus.State {
+	case "success":
+		emoji = "✅"
+	case "failure", "error":
+		emoji = "❌"
+	case "pending", "queued":
+		emoji = "⏳"
+	case "in_progress":
+		emoji = "🚀"
+	default:
+		emoji = "ℹ️"
+	}
+
+	var title string = emoji + " Deployment status updated on: " + gh.Repo.FullName + " (" + gh.Action + ")"
+
 	var color int
-	var title string = "Deployment status update (" + gh.Action + ") on " + gh.Repo.FullName
-	if gh.Action == "created" || gh.Action == "edited" {
+	if gh.DeploymentStatus.State == "success" {
 		color = colorGreen
+	} else if gh.DeploymentStatus.State == "pending" {
+		color = colorYellow
 	} else {
 		color = colorRed
 	}
@@ -63,7 +82,7 @@ func deploymentStatusFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.DeploymentStatus.TargetURL = "No URL available"
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:       color,

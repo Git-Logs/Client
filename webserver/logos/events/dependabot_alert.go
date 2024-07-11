@@ -36,14 +36,14 @@ type DependabotAlertEvent struct {
 	} `json:"alert"`
 }
 
-func dependabotAlertFn(bytes []byte) (discordgo.MessageSend, error) {
+func dependabotAlertFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh DependabotAlertEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var color int
@@ -137,7 +137,7 @@ func dependabotAlertFn(bytes []byte) (discordgo.MessageSend, error) {
 		dismissed = "Not dismissed"
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color: color,

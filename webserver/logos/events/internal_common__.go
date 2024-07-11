@@ -17,7 +17,7 @@ var (
 	colorDarkRed = 0x8b0000
 )
 
-var SupportedEvents = map[string]func(bytes []byte) (discordgo.MessageSend, error){
+var SupportedEvents = map[string]func(bytes []byte) (*discordgo.MessageSend, error){
 	"branch_protection_rule":      branchProtectionRuleFn,
 	"check_suite":                 checkSuiteFn,
 	"create":                      createFn,

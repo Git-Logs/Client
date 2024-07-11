@@ -33,14 +33,14 @@ type DiscussionEvent struct {
 	} `json:"discussion"`
 }
 
-func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
+func discussionFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh DiscussionEvent
 
 	// Unmarshall the json into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	switch gh.Action {
@@ -66,7 +66,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorGreen,
@@ -123,7 +123,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorYellow,
@@ -160,7 +160,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "..."
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorRed,
@@ -202,7 +202,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorRed,
@@ -248,7 +248,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.AnswerRespBody = gh.Discussion.AnswerRespBody[:3000] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -288,7 +288,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 
 		var descriptionString string = gh.Discussion.Title + " has been deleted by: " + gh.Sender.AuthorEmbed().Name
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -319,7 +319,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -359,7 +359,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:    gh.Repo.HTMLURL,
@@ -425,7 +425,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -467,7 +467,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -508,7 +508,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -554,7 +554,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,
@@ -596,7 +596,7 @@ func discussionFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.DiscussionURL + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,

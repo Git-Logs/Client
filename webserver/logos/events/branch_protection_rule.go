@@ -137,14 +137,14 @@ type BranchProtectionRuleEvent struct {
 	Changes map[string]any `json:"changes"`
 }
 
-func branchProtectionRuleFn(bytes []byte) (discordgo.MessageSend, error) {
+func branchProtectionRuleFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh BranchProtectionRuleEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var color int
@@ -154,7 +154,7 @@ func branchProtectionRuleFn(bytes []byte) (discordgo.MessageSend, error) {
 		title = "New branch protection rule: " + gh.Repo.FullName
 	} else if gh.Action == "edited" {
 		color = colorYellow
-		title = "Branch protection rule editted: " + gh.Repo.FullName
+		title = "Branch protection rule edited: " + gh.Repo.FullName
 	} else {
 		color = colorRed
 		title = "Branch protection rule deleted: " + gh.Repo.FullName
@@ -172,7 +172,7 @@ func branchProtectionRuleFn(bytes []byte) (discordgo.MessageSend, error) {
 		desc += "\n\n**Changes:**\n\n" + strings.Join(changes, ", ")
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:       color,

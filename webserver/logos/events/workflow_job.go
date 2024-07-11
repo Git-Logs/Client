@@ -43,14 +43,14 @@ type WorkflowJobEvent struct {
 	} `json:"workflow_job"`
 }
 
-func workflowJobFn(bytes []byte) (discordgo.MessageSend, error) {
+func workflowJobFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh WorkflowJobEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	if gh.WorkflowJob.Conclusion == "" {
@@ -110,7 +110,7 @@ func workflowJobFn(bytes []byte) (discordgo.MessageSend, error) {
 		})
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:  colorGreen,

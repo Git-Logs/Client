@@ -21,14 +21,14 @@ type CheckRunEvent struct {
 	} `json:"check_run"`
 }
 
-func checkRunFn(bytes []byte) (discordgo.MessageSend, error) {
+func checkRunFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh CheckRunEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	if gh.CheckRun.Conclusion == "" {
@@ -39,7 +39,7 @@ func checkRunFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.CheckRun.Status = "No status yet!"
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:     colorGreen,

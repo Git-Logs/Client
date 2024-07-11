@@ -23,13 +23,13 @@ type TeamEvent struct {
 	} `json:"team"`
 }
 
-func teamFn(bytes []byte) (discordgo.MessageSend, error) {
+func teamFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh TeamEvent
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var color int
@@ -75,7 +75,7 @@ func teamFn(bytes []byte) (discordgo.MessageSend, error) {
 		privacy = "No privacy settings set."
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:  color,

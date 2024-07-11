@@ -28,14 +28,14 @@ type DiscussionCommentEvent struct {
 	} `json:"discussion"`
 }
 
-func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
+func discussionCommentFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh DiscussionCommentEvent
 
 	// Unmarshall the json into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	switch gh.Action {
@@ -50,7 +50,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorGreen,
@@ -90,7 +90,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:190] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorGreen,
@@ -130,7 +130,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:200] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Color:       colorGreen,
@@ -171,7 +171,7 @@ func discussionCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 			gh.Discussion.Title = gh.Discussion.Title[:200] + "... [View Discussion](" + gh.Discussion.Url + ")"
 		}
 
-		return discordgo.MessageSend{
+		return &discordgo.MessageSend{
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					URL:         gh.Repo.HTMLURL,

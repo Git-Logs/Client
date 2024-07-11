@@ -29,14 +29,14 @@ type PushEvent struct {
 	BaseRef string `json:"base_ref"`
 }
 
-func pushFn(bytes []byte) (discordgo.MessageSend, error) {
+func pushFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh PushEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var commitList string
@@ -69,7 +69,7 @@ func pushFn(bytes []byte) (discordgo.MessageSend, error) {
 		branchInfo = "\n" + "**Base Ref:** " + gh.BaseRef
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:  colorGreen,

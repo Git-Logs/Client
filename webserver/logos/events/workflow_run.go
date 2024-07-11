@@ -32,14 +32,14 @@ type WorkflowRunEvent struct {
 	} `json:"workflow_run"`
 }
 
-func workflowRunFn(bytes []byte) (discordgo.MessageSend, error) {
+func workflowRunFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh WorkflowRunEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	if gh.WorkflowRun.Conclusion == "" {
@@ -50,7 +50,7 @@ func workflowRunFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.WorkflowRun.Status = "No status yet!"
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:  colorGreen,

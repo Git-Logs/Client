@@ -21,17 +21,17 @@ type PageBuildEvent struct {
 	Sender User       `json:"sender"`
 }
 
-func pageBuildFn(bytes []byte) (discordgo.MessageSend, error) {
+func pageBuildFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh PageBuildEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:     colorGreen,

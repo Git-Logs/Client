@@ -13,14 +13,14 @@ type IssuesEvent struct {
 	Issue  Issue      `json:"issue"`
 }
 
-func issuesFn(bytes []byte) (discordgo.MessageSend, error) {
+func issuesFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh IssuesEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var body string = gh.Issue.Body
@@ -39,7 +39,7 @@ func issuesFn(bytes []byte) (discordgo.MessageSend, error) {
 		color = colorGreen
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:       color,

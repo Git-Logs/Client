@@ -2,15 +2,37 @@
 package pneuma
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/git-logs/client/webserver/logos/eventmodifiers"
 	"github.com/git-logs/client/webserver/logos/events"
 	"github.com/git-logs/client/webserver/state"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
+)
+
+const (
+	// EMBED_TITLE_LIMIT is the maximum length of an embed title
+	EMBED_TITLE_LIMIT = 256
+	// EMBED_DESCRIPTION_LIMIT is the maximum length of an embed description
+	EMBED_DESCRIPTION_LIMIT = 4096
+	// EMBED_FIELDS_MAX_COUNT is the maximum number of fields in an embed
+	EMBED_FIELDS_MAX_COUNT = 25
+	// EMBED_FIELD_NAME_LIMIT is the maximum length of an embed field name
+	EMBED_FIELD_NAME_LIMIT = 256
+	// EMBED_FIELD_VALUE_LIMIT is the maximum length of an embed field value
+	EMBED_FIELD_VALUE_LIMIT = 1024
+	// EMBED_FOOTER_TEXT_LIMIT is the maximum length of an embed footer text
+	EMBED_FOOTER_TEXT_LIMIT = 2048
+	// EMBED_AUTHOR_NAME_LIMIT is the maximum length of an embed author name
+	EMBED_AUTHOR_NAME_LIMIT = 256
+	// EMBED_TOTAL_LIMIT is the maximum length of an embed
+	EMBED_TOTAL_LIMIT = 6000
 )
 
 func updateLogEntries(logId, webhookId, guildId string, entries ...any) error {
@@ -33,6 +55,66 @@ func updateLogEntries(logId, webhookId, guildId string, entries ...any) error {
 
 	_, err = state.Pool.Exec(state.Context, "UPDATE "+state.TableWebhookLogs+" SET entries = array_append(entries, $1) WHERE log_id = $2 AND webhook_id = $3 AND guild_id = $4", entry, logId, webhookId, guildId)
 	return err
+}
+
+func applyEmbedLimits(e *discordgo.MessageEmbed) *discordgo.MessageEmbed {
+	totalChars := 0
+
+	_getCharLimit := func(totalChars, limit, maxChars int) int {
+		if maxChars <= totalChars {
+			return 0
+		}
+
+		// If limit is 6000 and max_chars - total_chars is 1000, return 1000 etc.
+		return min(limit, maxChars-totalChars)
+	}
+
+	_sliceChars := func(s string, totalChars *int, limit, maxChars int) string {
+		charLimit := _getCharLimit(*totalChars, limit, maxChars)
+
+		if charLimit == 0 {
+			return ""
+		}
+
+		*totalChars += charLimit
+
+		return s[:charLimit]
+	}
+
+	if e.Title != "" {
+		// Slice title to EMBED_TITLE_LIMIT
+		e.Title = _sliceChars(e.Title, &totalChars, EMBED_TITLE_LIMIT, EMBED_TOTAL_LIMIT)
+	}
+
+	if e.Description != "" {
+		// Slice description to EMBED_DESCRIPTION_LIMIT
+		e.Description = _sliceChars(e.Description, &totalChars, EMBED_DESCRIPTION_LIMIT, EMBED_TOTAL_LIMIT)
+	}
+
+	// Slice out fields if there are too many
+	if len(e.Fields) > EMBED_FIELDS_MAX_COUNT {
+		e.Fields = e.Fields[:EMBED_FIELDS_MAX_COUNT]
+	}
+
+	for i, f := range e.Fields {
+		// Slice field name to EMBED_FIELD_NAME_LIMIT
+		e.Fields[i].Name = _sliceChars(f.Name, &totalChars, EMBED_FIELD_NAME_LIMIT, EMBED_TOTAL_LIMIT)
+
+		// Slice field value to EMBED_FIELD_VALUE_LIMIT
+		e.Fields[i].Value = _sliceChars(f.Value, &totalChars, EMBED_FIELD_VALUE_LIMIT, EMBED_TOTAL_LIMIT)
+	}
+
+	if e.Footer != nil {
+		// Slice footer text to EMBED_FOOTER_TEXT_LIMIT
+		e.Footer.Text = _sliceChars(e.Footer.Text, &totalChars, EMBED_FOOTER_TEXT_LIMIT, EMBED_TOTAL_LIMIT)
+	}
+
+	if e.Author != nil {
+		// Slice author name to EMBED_AUTHOR_NAME_LIMIT
+		e.Author.Name = _sliceChars(e.Author.Name, &totalChars, EMBED_AUTHOR_NAME_LIMIT, EMBED_TOTAL_LIMIT)
+	}
+
+	return e
 }
 
 func HandleEvents(
@@ -111,34 +193,60 @@ func HandleEvents(
 
 	evtFn, ok := events.SupportedEvents[header]
 
+	var messageSend *discordgo.MessageSend
+
 	if !ok {
 		updateLogEntries(logId, webhookId, guildId, "WARNING: This event cannot be personalized, will try propogating to configured webhooks (if supported)?")
-		// Instead of just being lazy, lets actually try to solve this problem here by using discords default github handler
 
-		/* TODO */
-		return
+		var fields map[string]any
+
+		if err := json.Unmarshal(bodyBytes, &fields); err != nil {
+			updateLogEntries(logId, webhookId, guildId, "Error unmarshalling event: "+err.Error())
+			state.Logger.Error("Error unmarshalling event", zap.Error(err), zap.String("repoName", rw.Repo.FullName), zap.String("webhookID", webhookId), zap.String("logId", logId))
+			return
+		}
+
+		var embed = discordgo.MessageEmbed{
+			Title:  cases.Title(language.English).String(strings.ReplaceAll(header, "_", " ")),
+			Fields: []*discordgo.MessageEmbedField{},
+		}
+
+		for k, v := range fields {
+			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+				Name:  cases.Title(language.English).String(strings.ReplaceAll(k, "_", " ")),
+				Value: cases.Title(language.English).String(strings.ReplaceAll(fmt.Sprintf("%v", v), "_", " ")),
+			})
+		}
+
+		messageSend = &discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{&embed},
+		}
 	} else {
 		// This event can be personalized
 		updateLogEntries(logId, webhookId, guildId, "SUCCESS: This event can be personalized")
-		messageSend, err := evtFn(bodyBytes)
+		messageSend, err = evtFn(bodyBytes)
 
 		if err != nil {
 			updateLogEntries(logId, webhookId, guildId, "Error processing event:", err.Error())
 			state.Logger.Error("Error processing event", zap.Error(err), zap.String("repoName", rw.Repo.FullName), zap.String("webhookID", webhookId), zap.String("event", header), zap.String("logId", logId))
 			return
 		}
+	}
 
-		for _, channelId := range channelIds {
-			updateLogEntries(logId, webhookId, guildId, "Sending event to channel: channelId="+channelId)
-			_, err := state.Discord.ChannelMessageSendComplex(channelId, &messageSend)
+	for i, embed := range messageSend.Embeds {
+		messageSend.Embeds[i] = applyEmbedLimits(embed)
+	}
 
-			if err != nil {
-				state.Discord.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
-					Content: "Could not send event " + header + " to channel: <#" + channelId + ">:" + err.Error(),
-				})
+	for _, channelId := range channelIds {
+		updateLogEntries(logId, webhookId, guildId, "Sending event to channel: channelId="+channelId)
+		_, err := state.Discord.ChannelMessageSendComplex(channelId, messageSend)
 
-				updateLogEntries(logId, "Could not send event "+header+" to channel: channelId="+channelId, "err="+err.Error())
-			}
+		if err != nil {
+			state.Discord.ChannelMessageSendComplex(channelId, &discordgo.MessageSend{
+				Content: "Could not send event " + header + " to channel: <#" + channelId + ">:" + err.Error(),
+			})
+
+			updateLogEntries(logId, "Could not send event "+header+" to channel: channelId="+channelId, "err="+err.Error())
 		}
 	}
 }

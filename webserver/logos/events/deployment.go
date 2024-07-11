@@ -24,14 +24,14 @@ type DeploymentEvent struct {
 	} `json:"deployment"`
 }
 
-func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
+func deploymentFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh DeploymentEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var color int
@@ -52,7 +52,7 @@ func deploymentFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.Deployment.Description = gh.Deployment.Description[:996] + "..."
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:       color,

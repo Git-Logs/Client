@@ -36,14 +36,14 @@ type CheckSuiteEvent struct {
 	} `json:"check_suite"`
 }
 
-func checkSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
+func checkSuiteFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh CheckSuiteEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	if gh.CheckSuite.Conclusion == "" {
@@ -54,7 +54,7 @@ func checkSuiteFn(bytes []byte) (discordgo.MessageSend, error) {
 		gh.CheckSuite.Status = "No status yet!"
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:  colorGreen,

@@ -17,14 +17,14 @@ type ReleaseEvent struct {
 	} `json:"release"`
 }
 
-func releaseFn(bytes []byte) (discordgo.MessageSend, error) {
+func releaseFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh ReleaseEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var color int
@@ -44,7 +44,7 @@ func releaseFn(bytes []byte) (discordgo.MessageSend, error) {
 		body = "No description available"
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:       color,

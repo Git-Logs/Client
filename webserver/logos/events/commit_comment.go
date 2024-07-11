@@ -16,14 +16,14 @@ type CommitCommentEvent struct {
 	}
 }
 
-func commitCommentFn(bytes []byte) (discordgo.MessageSend, error) {
+func commitCommentFn(bytes []byte) (*discordgo.MessageSend, error) {
 	var gh CommitCommentEvent
 
 	// Unmarshal the JSON into our struct
 	err := json.Unmarshal(bytes, &gh)
 
 	if err != nil {
-		return discordgo.MessageSend{}, err
+		return &discordgo.MessageSend{}, err
 	}
 
 	var comment string = gh.Comment.Body
@@ -43,7 +43,7 @@ func commitCommentFn(bytes []byte) (discordgo.MessageSend, error) {
 		color = colorGreen
 	}
 
-	return discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
 				Color:       color,
