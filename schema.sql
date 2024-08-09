@@ -7,6 +7,7 @@ CREATE TABLE webhooks (
     id TEXT PRIMARY KEY NOT NULL,
     guild_id TEXT NOT NULL REFERENCES guilds(id) ON DELETE CASCADE ON UPDATE CASCADE,
     comment TEXT NOT NULL, -- A comment to help identify the webhook
+    broken BOOLEAN NOT NULL DEFAULT FALSE, 
     secret TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by TEXT NOT NULL,

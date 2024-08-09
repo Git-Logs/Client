@@ -32,7 +32,7 @@ pub async fn list(
     } else {
         // Get all webhooks
         let webhooks = sqlx::query!(
-            "SELECT id, comment, created_at FROM webhooks WHERE guild_id = $1",
+            "SELECT id, broken, comment, created_at FROM webhooks WHERE guild_id = $1",
             ctx.guild_id().unwrap().to_string()
         )
         .fetch_all(&data.pool)
@@ -52,6 +52,7 @@ pub async fn list(
                         .title(format!("Webhook \"{}\"", webhook.comment))
                         .field("Webhook ID", webhook_id.clone(), false)
                         .field("Hook URL (visit for hook info, add to Github to recieve events)", api_url.clone()+"/kittycat?id="+&webhook_id, false)
+			.field("Marked as Broken", format!("{}", webhook.broken), false)
                         .field("Created at", webhook.created_at.to_string(), false)
                     );
                 };
@@ -73,6 +74,7 @@ pub async fn list(
 pub async fn newhook(
     ctx: Context<'_>,
     #[description = "The comment for the webhook"] comment: String,
+    #[description = "Is the webhook broken?"] broken: Option<bool>,
 ) -> Result<(), Error> {
     let data = ctx.data();
 
@@ -124,11 +126,12 @@ pub async fn newhook(
     };
 
     sqlx::query!(
-        "INSERT INTO webhooks (id, guild_id, comment, secret, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6)",
+        "INSERT INTO webhooks (id, guild_id, comment, secret, broken, created_by, last_updated_by) VALUES ($1, $2, $3, $4, $5, $6, $7)",
         id,
         ctx.guild_id().unwrap().to_string(),
         comment,
         webh_secret,
+	broken.unwrap_or(false),
         ctx.author().id.to_string(),
         ctx.author().id.to_string(),
     )
@@ -164,6 +167,101 @@ When creating repositories, use `{id}` as the ID.
     ).await?;
 
     ctx.say("Webhook created! Check your DMs for the webhook information.").await?;
+    
+    Ok(())
+}
+
+/// Edits a webhook
+#[poise::command(slash_command, prefix_command, guild_only, guild_cooldown = 60, required_permissions = "MANAGE_GUILD")]
+pub async fn edithook(
+    ctx: Context<'_>,
+    #[description = "The webhook ID"] id: String,
+    #[description = "The comment for the webhook"] comment: Option<String>,
+    #[description = "Is the webhook broken?"] broken: Option<bool>,
+    #[description = "The new secret for the webhook"] webhook_secret: Option<String>,
+) -> Result<(), Error> {
+    let data = ctx.data();
+
+    // Check if the guild exists on our DB
+    let guild = sqlx::query!(
+        "SELECT COUNT(1) FROM guilds WHERE id = $1",
+        ctx.guild_id().unwrap().to_string()
+    )
+    .fetch_one(&data.pool)
+    .await?;
+    
+    if guild.count.unwrap_or_default() == 0 {
+        // If it doesn't, create it
+        sqlx::query!(
+            "INSERT INTO guilds (id) VALUES ($1)",
+            ctx.guild_id().unwrap().to_string()
+        )
+        .execute(&data.pool)
+        .await?;
+    }
+
+    // Check webhook for existence
+    let webhook_count = sqlx::query!(
+        "SELECT COUNT(1) FROM webhooks WHERE guild_id = $1 AND id = $2",
+        ctx.guild_id().unwrap().to_string(),
+        id
+    )
+    .fetch_one(&data.pool)
+    .await?;
+
+    if webhook_count.count.unwrap_or_default() == 0 {
+        ctx.say("This webhook does not exist!").await?;
+        return Ok(());
+    }
+
+    let mut tx = data.pool.begin().await?;
+
+    if let Some(comment) = comment {
+        sqlx::query!(
+            "UPDATE webhooks SET comment = $1 WHERE id = $2 AND guild_id = $3",
+            comment,
+            id,
+            ctx.guild_id().unwrap().to_string()
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    if let Some(broken) = broken {
+        sqlx::query!(
+            "UPDATE webhooks SET broken = $1 WHERE id = $2 AND guild_id = $3",
+            broken,
+            id,
+            ctx.guild_id().unwrap().to_string()
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    if let Some(webhook_secret) = webhook_secret {
+        sqlx::query!(
+            "UPDATE webhooks SET secret = $1 WHERE id = $2 AND guild_id = $3",
+            webhook_secret,
+            id,
+            ctx.guild_id().unwrap().to_string()
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+
+    // Update last_updated_at and last_updated_by regardless
+    sqlx::query!(
+        "UPDATE webhooks SET last_updated_at = NOW(), last_updated_by = $1 WHERE id = $2 AND guild_id = $3",
+        ctx.author().id.to_string(),
+        id,
+        ctx.guild_id().unwrap().to_string()
+    )
+    .execute(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    ctx.say("Webhook updated successfully!").await?;
     
     Ok(())
 }

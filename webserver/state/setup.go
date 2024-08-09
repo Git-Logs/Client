@@ -179,6 +179,8 @@ func ApplyMigrations() {
 
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS webhook_id TEXT NOT NULL REFERENCES `+TableWebhooks+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
 		ALTER TABLE `+TableWebhookLogs+` ADD COLUMN IF NOT EXISTS guild_id TEXT NOT NULL REFERENCES `+TableGuilds+` (id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+		ALTER TABLE `+TableWebhooks+` ADD COLUMN IF NOT EXISTS broken BOOLEAN NOT NULL DEFAULT false;
 	`)
 
 	if err != nil {

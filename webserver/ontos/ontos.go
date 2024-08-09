@@ -22,10 +22,16 @@ import (
 	"go.uber.org/zap"
 )
 
+func formatBool(b bool) string {
+	if b {
+		return "true"
+	} else {
+		return "false"
+	}
+}
+
 func GetWebhookRoute(w http.ResponseWriter, r *http.Request) {
 	// Find the webhook in the database
-	var comment string
-
 	id := r.URL.Query().Get("id")
 
 	if id == "" {
@@ -34,7 +40,9 @@ func GetWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := state.Pool.QueryRow(state.Context, "SELECT comment FROM "+state.TableWebhooks+" WHERE id = $1", id).Scan(&comment)
+	var comment string
+	var broken bool
+	err := state.Pool.QueryRow(state.Context, "SELECT comment, broken FROM "+state.TableWebhooks+" WHERE id = $1", id).Scan(&comment, &broken)
 
 	if err != nil {
 		w.WriteHeader(404)
@@ -44,6 +52,7 @@ func GetWebhookRoute(w http.ResponseWriter, r *http.Request) {
 
 	var respStr = strings.Builder{}
 
+	respStr.WriteString("Broken: " + formatBool(broken) + "\n")
 	respStr.WriteString("Comment: " + comment + "\n\n")
 
 	// Get all event modifiers on this webhook
@@ -121,8 +130,6 @@ func GetWebhookRoute(w http.ResponseWriter, r *http.Request) {
 func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 	logId := crypto.RandString(128)
 
-	var secret string
-
 	id := r.URL.Query().Get("id")
 
 	if id == "" {
@@ -131,12 +138,19 @@ func HandleWebhookRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := state.Pool.QueryRow(state.Context, "SELECT secret FROM "+state.TableWebhooks+" WHERE id = $1", id).Scan(&secret)
+	var secret string
+	var broken bool
+	err := state.Pool.QueryRow(state.Context, "SELECT secret, broken FROM "+state.TableWebhooks+" WHERE id = $1", id).Scan(&secret, &broken)
 
 	if err != nil {
 		w.WriteHeader(404)
 		w.Write([]byte("This request has an invalid id parameter"))
 		return
+	}
+
+	if broken {
+		w.WriteHeader(500)
+		w.Write([]byte("This webhook is marked as broken!"))	
 	}
 
 	var guildId string
